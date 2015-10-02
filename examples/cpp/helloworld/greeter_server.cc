@@ -62,6 +62,10 @@ class GreeterServiceImpl final : public Greeter::Service {
   Status SayHelloInt(ServerContext* context, const HelloRequestInt* request,
                   HelloReply* reply) override {
     std::string prefix("Int= ");
+    //std::string buf;
+    //google::protobuf::TextFormat::PrintToString(request, &buf);
+
+    std::cout << "Inside" << prefix;
     
     reply->set_message(prefix); // + buf); // + Integer.toString(request->empid()));
     return Status::OK;
@@ -70,6 +74,8 @@ class GreeterServiceImpl final : public Greeter::Service {
     Status SayHelloDouble(ServerContext* context, const HelloRequestDouble* request,
                   HelloReply* reply) override {
     std::string prefix("Double= ");
+    std::cout << "Inside" << prefix;
+
     reply->set_message(prefix); // + Integer.toString(request->empid()));
     return Status::OK;
   }
@@ -77,6 +83,8 @@ class GreeterServiceImpl final : public Greeter::Service {
    Status SayHelloComplex(ServerContext* context, const HelloRequestComplex* request,
                   HelloReply* reply) override {
     std::string prefix("Complex= ");
+    std::cout << "Inside" << prefix;
+
     reply->set_message(prefix); // + Integer.toString(request->empid()));
     return Status::OK;
   }

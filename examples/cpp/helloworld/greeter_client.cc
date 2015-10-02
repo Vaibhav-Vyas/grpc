@@ -204,19 +204,40 @@ class GreeterClient {
   // Assambles the client's payload, sends it and presents the response back
   // from the server.
   std::string SayHelloComplex(const ::google::protobuf::int32 empid,
+                       const std::string& user,
                        const double salary,
+                       const ::google::protobuf::int32 empidManager,
+                       const std::string& userManager,
+                       const double salaryManager,
                        struct timespec *pStart,
                        struct timespec *pEnd,
                        uint64_t *pDiff) {
-    std::string buf;
-    // Data we are sending to the server.
-
-    HelloRequestDouble request;
-
-    request.set_salary(salary);
+    std::string buf; 
 
     // Container for the data we expect from the server.
     HelloReply reply;
+
+    // Data we are sending to the server.
+    HelloRequestComplex request;
+
+    // Option 1: Get allocated child object ptr from the parent.
+    HelloRequestComplex *pObjhrc = request.mutable_objhrc();
+
+    pObjhrc->set_empid(empidManager);
+    pObjhrc->set_name(userManager);
+    pObjhrc->set_salary(salaryManager);
+
+    request.set_empid(empid);
+    request.set_name(user);
+    request.set_salary(salary);
+
+    // Option 2:
+    // HelloRequestComplex *pObjhrc(new HelloRequestComplex());
+    // pObjhrc->set_empid(empidManager);
+    // pObjhrc->set_name(userManager);
+    // pObjhrc->set_salary(salaryManager);
+    // request.set_allocated_objhrc(&objhrc);
+
 
     // Context for the client. It could be used to convey extra information to
     // the server and/or tweak certain RPC behaviors.
@@ -230,7 +251,7 @@ class GreeterClient {
     *pDiff = diffTime(*pStart, *pEnd);
 
     // The actual RPC.
-    Status status = stub_->SayHelloDouble(&context, request, &reply); 
+    Status status = stub_->SayHelloComplex(&context, request, &reply); 
     // Act upon its status.
     if (status.ok()) {
       return reply.message();
@@ -295,10 +316,15 @@ measureRoundTripTime(GreeterClient *pGreeter,
     uint64_t diffNanoSec;
     int run;
     vector<string> strMsg;
-    std::string user("world");
-    ::google::protobuf::int32 empId = 1000;
-    double salary = 50123.56;
     char experimentTitle[80];
+
+    ::google::protobuf::int32 empId = 1000;
+    std::string user("empName");
+    double salary = 50123.56;
+    // Manager data
+    ::google::protobuf::int32 empIdManager = 450;
+    std::string userManager("Manager");
+    double salaryManager = 241041.85;
 
 
     cout << "================================================" << std::endl;
@@ -341,7 +367,7 @@ measureRoundTripTime(GreeterClient *pGreeter,
     cout << "================================================" << std::endl;
     cout << "1.c) Measuring GRPC Marshall time for string." << std::endl;
     cout << "================================================" << std::endl;
-    sprintf(experimentTitle,"Part2_Q1_b_MarshallDouble_OptimizationMode_%d_IP_%s",
+    sprintf(experimentTitle,"Part2_Q1_c_MarshallString_OptimizationMode_%d_IP_%s",
         gccOptimizationMode, pServIPPort);
     for (run = 0; run < maxAttempts; run++)
     {
@@ -356,7 +382,24 @@ measureRoundTripTime(GreeterClient *pGreeter,
     createCSVReport(experimentTitle, maxAttempts, &strMsg);
 
 
+    cout << "================================================" << std::endl;
+    cout << "1.d) Measuring GRPC Marshall time for Complex datatype." << std::endl;
+    cout << "================================================" << std::endl;
+    sprintf(experimentTitle,"Part2_Q1_d_MarshallComplex_OptimizationMode_%d_IP_%s",
+        gccOptimizationMode, pServIPPort);
+    for (run = 0; run < maxAttempts; run++)
+    {
+      std::string reply = pGreeter->SayHelloComplex(empId, user, salary,
+            empIdManager, userManager, salaryManager,
+            &start, &end, &diffNanoSec);
+      monotonicClk[run] = (uint64_t) diffNanoSec;
 
+      //std::cout << "Greeter received: " << reply << std::endl;
+      printf("\t * Marshall String: Attempts: %d), String Type, Sent Msg=,%s, Received Msg=,%s, Time taken = ,%llu,nanoseconds\n",
+              run, user.c_str(), reply.c_str(), 
+             (long long unsigned int)diffNanoSec);
+    }
+    createCSVReport(experimentTitle, maxAttempts, &strMsg);
 
 
 
