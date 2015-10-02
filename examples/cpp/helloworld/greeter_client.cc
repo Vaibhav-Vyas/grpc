@@ -42,6 +42,7 @@
 
 using grpc::Channel;
 using grpc::ClientContext;
+using grpc::ClientWriter;
 using grpc::Status;
 using helloworld::HelloRequest;
 using helloworld::HelloRequestInt;
@@ -126,6 +127,53 @@ class GreeterClient {
       return "RPC failed";
     }
   }
+
+
+
+void RecordRoute(long bytesPerPacket,
+           int noOfLoops,
+           struct timespec *pStart,
+           struct timespec *pEnd,
+           uint64_t *pDiff) {
+    HelloRequest point;
+    HelloReply stats;
+    ClientContext context;
+
+    char *arr = (char *)malloc(bytesPerPacket);
+    memset(arr, 'A', bytesPerPacket);
+    string largeStr(arr);
+    point.set_name(largeStr);
+
+    // Measuring RPC msg marshalling overhead.
+    clock_gettime(CLOCK_MONOTONIC, pStart);
+
+    std::unique_ptr<ClientWriter<HelloRequest> > writer(
+        stub_->RecordRoute(&context, &stats));
+    for (int i = 0; i < noOfLoops; i++) {
+
+      if (!writer->Write(point)) {
+        // Broken stream.
+        break;
+      }
+
+    }
+    writer->WritesDone();
+    Status status = writer->Finish();
+
+    clock_gettime(CLOCK_MONOTONIC, pEnd);
+    *pDiff = diffTime(*pStart, *pEnd);
+
+    if (status.ok()) {
+      std::cout << "Finished: Server Sent Msg" << stats.message() << std::endl;
+    } else {
+      std::cout << "RecordRoute rpc failed." << std::endl;
+    }
+    free(arr);
+  }
+
+
+
+
 
   // Assambles the client's payload, sends it and presents the response back
   // from the server.
@@ -273,7 +321,7 @@ measureRoundTripTime(GreeterClient *pGreeter,
 
 int main(int argc, char** argv) {
   int gccOptimizationMode;
-  int maxAttempts = 10;
+  int maxAttempts = 100;
   char servIPPort[25] = {0};
   int rc = 0;
 
@@ -326,6 +374,57 @@ measureRoundTripTime(GreeterClient *pGreeter,
     std::string userManager("Manager");
     double salaryManager = 241041.85;
 
+
+
+    cout << "================================================" << std::endl;
+    cout << "7) Measuring GRPC Bandwidth for large packets." << std::endl;
+    cout << "================================================" << std::endl;
+    int diffPacketsCount = 5;
+    long bytesPerPacket[] = {65500, 32*1024, 16*1024, 8*1024, 4*1024, 2*1024, 1024, 512, 255, 128, 64, 32, 16, 8, 4, 2};
+    long loopCount = 1000;
+    vector<string> bwTable;
+    char result[512];
+
+    unsigned long long sumBytes;
+
+    sprintf(experimentTitle,"Part2_Q7_Bandwidth_LargeSize_OptimizationMode_%d_IP_%s",
+        gccOptimizationMode, pServIPPort);
+
+    for (int i = 0; i < diffPacketsCount; i++)
+    {
+        sumBytes = bytesPerPacket[1] * loopCount;
+        pGreeter->RecordRoute(bytesPerPacket[i], loopCount,
+                  &start, &end, &diffNanoSec);
+
+
+        float sumBytesMB = (float)sumBytes * 1.0 / (1024 * 1024.0);
+        float totalTimeTakeSec = (diffNanoSec  / (1024 * 1024.0 * 1024));
+        float bwMBps = (float)sumBytesMB / totalTimeTakeSec;
+/*
+        printf("***********************************\n");
+        printf(" Bandwidth Summary.\n");
+        printf("***********************************\n");
+        printf("\t * Total Sent Bytes =,%llu, \n", (long long unsigned int)sumBytes);
+        printf("\t * Total Sent (MB) =,%f, \n", sumBytesMB);
+        printf("\t * Total Time taken (nanoSec) =,%llu, \n", (long long unsigned int)diffNanoSec);
+        printf("\t * Total Time taken (Sec) =,%f, \n", totalTimeTakeSec);
+        printf("***********************************\n");
+        printf("\t * Bandwidth (MBps) =,%f,\n", bwMBps);
+        printf("***********************************\n");
+*/
+
+        sprintf(result, "* BW: Large Msg: Attempts:%d),Packet Size=,%ld, Total Sent(bytes)=,%llu,Total Sent (MB)=,%f,Time taken(nanosec)=,%llu, Time taken (seconds) = %f,Bandwidth (MBps) =,%f,\n",
+                  loopCount, bytesPerPacket[i], (unsigned long long)(sumBytes),
+                  sumBytesMB, (long long unsigned int)diffNanoSec, totalTimeTakeSec, bwMBps);
+        bwTable.push_back(string(result));
+    }
+    for (int i = 0; i < diffPacketsCount; i++)
+    {
+      printf("%s\n",bwTable[i].c_str());
+    }
+    
+    if (1)
+      return 0;
 
     cout << "================================================" << std::endl;
     cout << "1.a) Measuring GRPC Marshall time for integers." << std::endl;

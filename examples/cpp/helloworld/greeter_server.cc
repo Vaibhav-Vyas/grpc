@@ -42,6 +42,7 @@
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
+using grpc::ServerReader;
 using grpc::Status;
 using helloworld::HelloRequest;
 using helloworld::HelloReply;
@@ -56,6 +57,29 @@ class GreeterServiceImpl final : public Greeter::Service {
                   HelloReply* reply) override {
     std::string prefix("Hello ");
     reply->set_message(prefix + request->name()); 
+    return Status::OK;
+  }
+
+  Status RecordRoute(ServerContext* context, ServerReader<HelloRequest>* reader,
+                     HelloReply* summary) override {
+    HelloRequest point;
+    int point_count = 0;
+    long bytes_recv = 0;
+
+    std::cout <<"Before Stream" << point_count;    
+
+    while (reader->Read(&point)) {
+      point_count++;
+      
+      bytes_recv += strlen(point.name().c_str());
+      std::cout <<"    Stream " << point_count;    
+    }
+
+    std::string result;
+    result ="Total = ";
+    result += static_cast<long>(point_count);
+    summary->set_message(std::string("Inside Stream: Received Bytes = " + result));
+
     return Status::OK;
   }
 
