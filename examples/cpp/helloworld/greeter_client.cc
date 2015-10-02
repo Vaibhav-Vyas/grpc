@@ -379,7 +379,7 @@ measureRoundTripTime(GreeterClient *pGreeter,
     cout << "================================================" << std::endl;
     cout << "7) Measuring GRPC Bandwidth for large packets." << std::endl;
     cout << "================================================" << std::endl;
-    int diffPacketsCount = 5;
+    int diffPacketsCount = 15;
     long bytesPerPacket[] = {65500, 32*1024, 16*1024, 8*1024, 4*1024, 2*1024, 1024, 512, 255, 128, 64, 32, 16, 8, 4, 2};
     long loopCount = 1000;
     vector<string> bwTable;

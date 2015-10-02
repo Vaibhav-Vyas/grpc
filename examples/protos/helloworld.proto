@@ -47,6 +47,13 @@ service Greeter {
 
   // Pass integer to measure its marshalling cost.
   rpc SayHelloComplex (HelloRequestComplex) returns (HelloReply) {}
+
+
+  // A client-to-server streaming RPC.
+  //
+  // Accepts a stream of large packets, returning the 
+  // Summary of count of large packets.
+  rpc RecordRoute(stream HelloRequest) returns (HelloReply) {}
 }
 
 // The request message containing the user's name.
