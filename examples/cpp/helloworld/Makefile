@@ -39,6 +39,11 @@ GRPC_CPP_PLUGIN_PATH ?= `which $(GRPC_CPP_PLUGIN)`
 
 PROTOS_PATH = ../../protos
 
+# Adding GRPC protobuf paths in Include and linker flags.
+CPPFLAGS += -I$(GRPC_GIT_ROOT)/grpc/third_party/protobuf/src -I$(GRPC_GIT_ROOT)/grpc/include
+LDFLAGS += -L$(GRPC_GIT_ROOT)/grpc/libs/opt/protobuf -L$(GRPC_GIT_ROOT)/grpc/libs/opt
+
+
 vpath %.proto $(PROTOS_PATH)
 
 all: system-check greeter_client greeter_server greeter_async_client greeter_async_server

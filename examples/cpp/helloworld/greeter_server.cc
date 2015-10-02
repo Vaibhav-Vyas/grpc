@@ -45,6 +45,9 @@ using grpc::ServerContext;
 using grpc::Status;
 using helloworld::HelloRequest;
 using helloworld::HelloReply;
+using helloworld::HelloRequestInt;
+using helloworld::HelloRequestDouble;
+using helloworld::HelloRequestComplex;
 using helloworld::Greeter;
 
 // Logic and data behind the server's behavior.
@@ -52,7 +55,29 @@ class GreeterServiceImpl final : public Greeter::Service {
   Status SayHello(ServerContext* context, const HelloRequest* request,
                   HelloReply* reply) override {
     std::string prefix("Hello ");
-    reply->set_message(prefix + request->name());
+    reply->set_message(prefix + request->name()); 
+    return Status::OK;
+  }
+
+  Status SayHelloInt(ServerContext* context, const HelloRequestInt* request,
+                  HelloReply* reply) override {
+    std::string prefix("Int= ");
+    
+    reply->set_message(prefix); // + buf); // + Integer.toString(request->empid()));
+    return Status::OK;
+  }
+
+    Status SayHelloDouble(ServerContext* context, const HelloRequestDouble* request,
+                  HelloReply* reply) override {
+    std::string prefix("Double= ");
+    reply->set_message(prefix); // + Integer.toString(request->empid()));
+    return Status::OK;
+  }
+
+   Status SayHelloComplex(ServerContext* context, const HelloRequestComplex* request,
+                  HelloReply* reply) override {
+    std::string prefix("Complex= ");
+    reply->set_message(prefix); // + Integer.toString(request->empid()));
     return Status::OK;
   }
 };

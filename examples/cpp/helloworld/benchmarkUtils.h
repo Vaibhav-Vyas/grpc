@@ -46,7 +46,7 @@ int createCSVReport(char *pBenchmarkTitle, int maxRuns, vector<string> *pStrMsg)
 
     time(&rawtime);
     timeinfo = localtime(&rawtime);
-    printf ("Creatomg CSV report");
+    printf ("Creating CSV report");
 
     strftime(timeYyMMdd,80,"%Y-%m-%d-%H-%M-%S",timeinfo);
     puts(timeYyMMdd);

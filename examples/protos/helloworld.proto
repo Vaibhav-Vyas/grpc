@@ -3,7 +3,7 @@
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
-// met:
+// met: 
 //
 //     * Redistributions of source code must retain the above copyright
 // notice, this list of conditions and the following disclaimer.
@@ -38,14 +38,42 @@ package helloworld;
 service Greeter {
   // Sends a greeting
   rpc SayHello (HelloRequest) returns (HelloReply) {}
+
+  // Pass integer to measure its marshalling cost.
+  rpc SayHelloInt (HelloRequestInt) returns (HelloReply) {}
+
+  // Pass double to measure its marshalling cost.
+  rpc SayHelloDouble (HelloRequestDouble) returns (HelloReply) {}
+
+  // Pass integer to measure its marshalling cost.
+  rpc SayHelloComplex (HelloRequestComplex) returns (HelloReply) {}
 }
 
 // The request message containing the user's name.
 message HelloRequest {
-  string name = 1;
+  /*required*/ string name = 1;
 }
+
+// The request message containing the user's name.
+message HelloRequestInt {
+  /*required*/ int32 empid = 1;
+}
+
+// The request message containing the user's name.
+message HelloRequestDouble {
+  /*required*/ double salary = 1;
+}
+
+// The request message containing the user's name.
+message HelloRequestComplex {
+  /*required*/ int32 empid = 1;
+  /*required*/ string name = 2;
+  /*required*/ double salary = 3;
+  /*required*/ HelloRequestComplex objhrc = 4;
+}
+
 
 // The response message containing the greetings
 message HelloReply {
-  string message = 1;
+  /*required*/ string message = 1;
 }

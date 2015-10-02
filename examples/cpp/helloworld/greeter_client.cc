@@ -44,6 +44,9 @@ using grpc::Channel;
 using grpc::ClientContext;
 using grpc::Status;
 using helloworld::HelloRequest;
+using helloworld::HelloRequestInt;
+using helloworld::HelloRequestDouble;
+using helloworld::HelloRequestComplex;
 using helloworld::HelloReply;
 using helloworld::Greeter;
 
@@ -86,6 +89,156 @@ class GreeterClient {
     }
   }
 
+
+   // Assambles the client's payload, sends it and presents the response back
+  // from the server.
+  std::string SayHelloString(const std::string& user,
+                       struct timespec *pStart,
+                       struct timespec *pEnd,
+                       uint64_t *pDiff) {
+    std::string buf;
+    // Data we are sending to the server.
+    HelloRequest request;
+    request.set_name(user);
+
+    // Container for the data we expect from the server.
+    HelloReply reply;
+
+    // Context for the client. It could be used to convey extra information to
+    // the server and/or tweak certain RPC behaviors.
+    ClientContext context;
+
+
+    // Measuring RPC msg marshalling overhead.
+    clock_gettime(CLOCK_MONOTONIC, pStart);
+
+    request.SerializeToString(&buf);
+    clock_gettime(CLOCK_MONOTONIC, pEnd);
+    *pDiff = diffTime(*pStart, *pEnd);
+
+    // The actual RPC.
+    Status status = stub_->SayHello(&context, request, &reply); 
+
+    // Act upon its status.
+    if (status.ok()) {
+      return reply.message();
+    } else {
+      return "RPC failed";
+    }
+  }
+
+  // Assambles the client's payload, sends it and presents the response back
+  // from the server.
+  std::string SayHelloInt(const ::google::protobuf::int32 empid,
+                       struct timespec *pStart,
+                       struct timespec *pEnd,
+                       uint64_t *pDiff) {
+    std::string buf;
+    // Data we are sending to the server.
+
+    HelloRequestInt request;
+
+    request.set_empid(empid);
+
+    // Container for the data we expect from the server.
+    HelloReply reply;
+
+    // Context for the client. It could be used to convey extra information to
+    // the server and/or tweak certain RPC behaviors.
+    ClientContext context;
+
+    // Measuring RPC msg marshalling overhead.
+    clock_gettime(CLOCK_MONOTONIC, pStart);
+
+    request.SerializeToString(&buf);
+    clock_gettime(CLOCK_MONOTONIC, pEnd);
+    *pDiff = diffTime(*pStart, *pEnd);
+
+    // The actual RPC.
+    Status status = stub_->SayHelloInt(&context, request, &reply); 
+    // Act upon its status.
+    if (status.ok()) {
+      return reply.message();
+    } else {
+      return "RPC failed";
+    }
+  }
+
+  // Assambles the client's payload, sends it and presents the response back
+  // from the server.
+  std::string SayHelloDouble(const double salary,
+                       struct timespec *pStart,
+                       struct timespec *pEnd,
+                       uint64_t *pDiff) {
+    std::string buf;
+    // Data we are sending to the server.
+
+    HelloRequestDouble request;
+
+    request.set_salary(salary);
+
+    // Container for the data we expect from the server.
+    HelloReply reply;
+
+    // Context for the client. It could be used to convey extra information to
+    // the server and/or tweak certain RPC behaviors.
+    ClientContext context;
+
+    // Measuring RPC msg marshalling overhead.
+    clock_gettime(CLOCK_MONOTONIC, pStart);
+
+    request.SerializeToString(&buf);
+    clock_gettime(CLOCK_MONOTONIC, pEnd);
+    *pDiff = diffTime(*pStart, *pEnd);
+
+    // The actual RPC.
+    Status status = stub_->SayHelloDouble(&context, request, &reply); 
+    // Act upon its status.
+    if (status.ok()) {
+      return reply.message();
+    } else {
+      return "RPC failed";
+    }
+  }
+
+  // Assambles the client's payload, sends it and presents the response back
+  // from the server.
+  std::string SayHelloComplex(const ::google::protobuf::int32 empid,
+                       const double salary,
+                       struct timespec *pStart,
+                       struct timespec *pEnd,
+                       uint64_t *pDiff) {
+    std::string buf;
+    // Data we are sending to the server.
+
+    HelloRequestDouble request;
+
+    request.set_salary(salary);
+
+    // Container for the data we expect from the server.
+    HelloReply reply;
+
+    // Context for the client. It could be used to convey extra information to
+    // the server and/or tweak certain RPC behaviors.
+    ClientContext context;
+
+    // Measuring RPC msg marshalling overhead.
+    clock_gettime(CLOCK_MONOTONIC, pStart);
+
+    request.SerializeToString(&buf);
+    clock_gettime(CLOCK_MONOTONIC, pEnd);
+    *pDiff = diffTime(*pStart, *pEnd);
+
+    // The actual RPC.
+    Status status = stub_->SayHelloDouble(&context, request, &reply); 
+    // Act upon its status.
+    if (status.ok()) {
+      return reply.message();
+    } else {
+      return "RPC failed";
+    }
+  }  
+
  private:
   std::unique_ptr<Greeter::Stub> stub_;
 };
@@ -110,7 +263,7 @@ int main(int argc, char** argv) {
   }
   else
   {
-      printf("IP =%s", argv[1]);
+      printf("IP =%s\n", argv[1]);
       sprintf(servIPPort, "%s __", argv[1]);
       servIPPort[strlen(argv[1])] = '\0';
       //strcpy(servIPPort, "%s\0", argv[1]);
@@ -143,15 +296,75 @@ measureRoundTripTime(GreeterClient *pGreeter,
     int run;
     vector<string> strMsg;
     std::string user("world");
-    char experimentTitle[64];
+    ::google::protobuf::int32 empId = 1000;
+    double salary = 50123.56;
+    char experimentTitle[80];
 
 
-    sprintf(experimentTitle,"Q4_RoundTripCalc_OptimzationMode_%d_RTT_SmallMsg_IP_%s",
+    cout << "================================================" << std::endl;
+    cout << "1.a) Measuring GRPC Marshall time for integers." << std::endl;
+    cout << "================================================" << std::endl;
+    sprintf(experimentTitle,"Part2_Q1_a_MarshallInt_OptimizationMode_%d_IP_%s",
         gccOptimizationMode, pServIPPort);
+    for (run = 0; run < maxAttempts; run++)
+    {
+      std::string reply = pGreeter->SayHelloInt(empId, &start, &end, &diffNanoSec);
+      monotonicClk[run] = (uint64_t) diffNanoSec;
+
+      //std::cout << "Greeter received: " << reply << std::endl;
+      printf("\t * Marshall Int: Attempts: %d), Int32 Type, Sent Msg=,%d, Received Msg=,%s, Time taken = ,%llu,nanoseconds\n",
+              run, empId, reply.c_str(), 
+             (long long unsigned int)diffNanoSec);
+    }
+    createCSVReport(experimentTitle, maxAttempts, &strMsg);
+
+
+    cout << "================================================" << std::endl;
+    cout << "1.b) Measuring GRPC Marshall time for Doubles." << std::endl;
+    cout << "================================================" << std::endl;
+    sprintf(experimentTitle,"Part2_Q1_b_MarshallDouble_OptimizationMode_%d_IP_%s",
+        gccOptimizationMode, pServIPPort);
+    for (run = 0; run < maxAttempts; run++)
+    {
+      std::string reply = pGreeter->SayHelloDouble(salary, &start, &end, &diffNanoSec);
+      monotonicClk[run] = (uint64_t) diffNanoSec;
+
+      //std::cout << "Greeter received: " << reply << std::endl;
+      printf("\t * Marshall Int: Attempts: %d), Int32 Type, Sent Msg=,%f, Received Msg=,%s, Time taken = ,%llu,nanoseconds\n",
+              run, salary, reply.c_str(), 
+             (long long unsigned int)diffNanoSec);
+    }
+    createCSVReport(experimentTitle, maxAttempts, &strMsg);
+
+
+
+    cout << "================================================" << std::endl;
+    cout << "1.c) Measuring GRPC Marshall time for string." << std::endl;
+    cout << "================================================" << std::endl;
+    sprintf(experimentTitle,"Part2_Q1_b_MarshallDouble_OptimizationMode_%d_IP_%s",
+        gccOptimizationMode, pServIPPort);
+    for (run = 0; run < maxAttempts; run++)
+    {
+      std::string reply = pGreeter->SayHelloString(user, &start, &end, &diffNanoSec);
+      monotonicClk[run] = (uint64_t) diffNanoSec;
+
+      //std::cout << "Greeter received: " << reply << std::endl;
+      printf("\t * Marshall String: Attempts: %d), String Type, Sent Msg=,%s, Received Msg=,%s, Time taken = ,%llu,nanoseconds\n",
+              run, user.c_str(), reply.c_str(), 
+             (long long unsigned int)diffNanoSec);
+    }
+    createCSVReport(experimentTitle, maxAttempts, &strMsg);
+
+
+
+
+
 
     cout << "================================================" << std::endl;
     cout << "4) Measuring GRPC roundtrip time (small msg => string msg." << std::endl;
     cout << "================================================" << std::endl;
+    sprintf(experimentTitle,"Part2_Q4_RoundTripCalc_OptimizationMode_%d_SmallMsg_IP_%s",
+        gccOptimizationMode, pServIPPort);
     for (run = 0; run < maxAttempts; run++)
     {
       std::string reply = pGreeter->SayHello(user, &start, &end, &diffNanoSec);
