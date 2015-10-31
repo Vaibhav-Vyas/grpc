@@ -49,10 +49,92 @@ using afs_grpc::HelloReply;
 using afs_grpc::HelloRequestInt;
 using afs_grpc::HelloRequestDouble;
 using afs_grpc::HelloRequestComplex;
+
+// AFS Data Types:
+using afs_grpc::FileInodeParams;
+using afs_grpc::ReturnCode;
+using afs_grpc::FileRWParams;
+
 using afs_grpc::Greeter;
 
 // Logic and data behind the server's behavior.
 class GreeterServiceImpl final : public Greeter::Service {
+
+
+  //****************************************************************************
+  // AFS File system API.
+  // Implementing AFS prototype in usermode using FUSE.
+  //****************************************************************************
+    
+    
+  Status AfsTestAuth(ServerContext* context, const FileInodeParams* request,
+                  ReturnCode* reply) override {
+    std::string prefix("AfsTestAuth");
+    int errorCode = 0;
+
+    //std::string buf;
+    //google::protobuf::TextFormat::PrintToString(request, &buf);
+
+    std::cout << "Inside" << prefix;
+    
+    reply->set_message(prefix);
+    reply->set_errorcode(errorCode);
+    return Status::OK;
+  }
+    
+  //
+  // AFS: AfsStore: 
+  // A client-to-server streaming RPC.
+  // Pass path and file write contents to server.
+  //
+  // return 0 if operation is successful; 
+  // else returns relevant error codes.
+  //
+  Status AfsStore(ServerContext* context, ServerReader<FileRWParams>* reader,
+                     ReturnCode* reply) override {
+    FileRWParams point;
+    int point_count = 0;
+    long bytes_recv = 0;
+    int errorCode = 0;
+    std::string result;
+
+
+    std::cout <<"On AfsStore start" << point_count;    
+
+    while (reader->Read(&point)) {
+      point_count++;
+      
+      bytes_recv += strlen(point.data().c_str());
+      std::cout <<"    Stream " << point_count;
+      
+      // TODO: Write these bytes to specified file on this server.
+      
+    }
+
+
+    result ="Total = ";
+    result += static_cast<long>(point_count);
+    
+    // Return result
+    reply->set_message(std::string("Inside AfsStore: Received Bytes = " + result));
+    reply->set_errorcode(errorCode);
+    return Status::OK;
+  }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+  //****************************************************************************
+  // Benchmark RPC latency for different data types.
+  //****************************************************************************
   Status SayHello(ServerContext* context, const HelloRequest* request,
                   HelloReply* reply) override {
     std::string prefix("Hello ");

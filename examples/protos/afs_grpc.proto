@@ -39,6 +39,48 @@ service Greeter {
   // Sends a greeting
   rpc SayHello (HelloRequest) returns (HelloReply) {}
 
+  //****************************************************************************
+  // AFS File system API.
+  // Implementing AFS prototype in usermode using FUSE.
+  //****************************************************************************
+  
+  //
+  // AFS: AfsTestAuth: Pass path and timestamp to know 
+  // if the path passed was the latest time or not.
+  //
+  // return 0 if client cache is the latest copy; 
+  // return other values (error codes) if client cache is outdated.
+  //
+  rpc AfsTestAuth (FileInodeParams) returns (ReturnCode) {}
+  
+  //
+  // AFS: AfsStore: 
+  // A client-to-server streaming RPC.
+  // Accepts a stream of large packets to be written to a specified file.
+  // Pass path and contents to be written to file on server.
+  //
+  // return 0 if operation is successful; 
+  // else returns relevant error codes.
+  //
+  rpc AfsStore(stream FileRWParams) returns (ReturnCode) {}
+  
+  //
+  // AFS: AfsFetch: 
+  // A server-to-client streaming RPC.
+  // Pass path and file write contents to server.
+  //
+  // return 0 if operation is successful; 
+  // else returns relevant error codes.
+  //
+  rpc AfsFetch(FileInodeParams) returns (stream FileRWParams) {}
+  
+  
+  
+  
+  //****************************************************************************
+  // Benchmark RPC latency for different data types.
+  //****************************************************************************
+
   // Pass integer to measure its marshalling cost.
   rpc SayHelloInt (HelloRequestInt) returns (HelloReply) {}
 
@@ -79,8 +121,47 @@ message HelloRequestComplex {
   /*required*/ HelloRequestComplex objhrc = 4;
 }
 
-
 // The response message containing the greetings
 message HelloReply {
   /*required*/ string message = 1;
 }
+
+// The response message containing the greetings
+message ReturnCode {
+  /*required*/ string message = 1;
+  /*required*/ int32 errorCode = 2;
+}
+
+// Creating RPC Data type for String.
+message RpcStringObj {
+  /*required*/ string message = 1;
+}
+
+// Creating RPC Data type for Int.
+message RpcInt32Obj {
+  /*required*/ int32 data = 1;
+}
+
+// Creating RPC Data type for Double.
+message RpcDoubleObj {
+  /*required*/ double data = 1;
+}
+
+//
+// AFS: TestAuth: Pass path and timestamp to know 
+// if the path passed was the latest time or not.
+//
+message FileInodeParams {
+  /*required*/ string path = 1;
+  /*required*/ int32 timestamp = 2;
+}
+
+//
+// AFS: FileRWParams: File read / write contents.
+//
+message FileRWParams {
+  /*required*/ string path = 1;
+  /*required*/ string data = 2;
+}
+
+
