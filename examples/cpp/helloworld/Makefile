@@ -54,10 +54,10 @@ greeter_client: helloworld.pb.o helloworld.grpc.pb.o greeter_client.o
 greeter_server: helloworld.pb.o helloworld.grpc.pb.o greeter_server.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
-afs_client_grpc: helloworld.pb.o helloworld.grpc.pb.o afs_client_grpc.o
+afs_client_grpc: afs_grpc.pb.o afs_grpc.grpc.pb.o afs_client_grpc.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
-afs_server_grpc: helloworld.pb.o helloworld.grpc.pb.o afs_server_grpc.o
+afs_server_grpc: afs_grpc.pb.o afs_grpc.grpc.pb.o afs_server_grpc.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
 greeter_async_client: helloworld.pb.o helloworld.grpc.pb.o greeter_async_client.o

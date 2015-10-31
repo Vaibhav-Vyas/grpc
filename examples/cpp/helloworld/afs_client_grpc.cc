@@ -37,19 +37,19 @@
 
 #include <grpc++/grpc++.h>
 
-#include "helloworld.grpc.pb.h"
+#include "afs_grpc.grpc.pb.h"
 #include "./benchmarkUtils.h"
 
 using grpc::Channel;
 using grpc::ClientContext;
 using grpc::ClientWriter;
 using grpc::Status;
-using helloworld::HelloRequest;
-using helloworld::HelloRequestInt;
-using helloworld::HelloRequestDouble;
-using helloworld::HelloRequestComplex;
-using helloworld::HelloReply;
-using helloworld::Greeter;
+using afs_grpc::HelloRequest;
+using afs_grpc::HelloRequestInt;
+using afs_grpc::HelloRequestDouble;
+using afs_grpc::HelloRequestComplex;
+using afs_grpc::HelloReply;
+using afs_grpc::Greeter;
 
 class GreeterClient {
  public:
