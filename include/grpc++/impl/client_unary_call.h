@@ -37,6 +37,15 @@
 #include <grpc++/impl/call.h>
 #include <grpc++/support/config.h>
 #include <grpc++/support/status.h>
+#include <iostream>
+#include <time.h>       /* timer */
+
+
+//to get the time
+uint64_t nanos_since_midnight()
+{
+	return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+}
 
 namespace grpc {
 
@@ -44,6 +53,8 @@ class Channel;
 class ClientContext;
 class CompletionQueue;
 class RpcMethod;
+
+uint64_t start, end;
 
 // Wrapper that performs a blocking unary call
 template <class InputMessage, class OutputMessage>
@@ -59,13 +70,49 @@ Status BlockingUnaryCall(Channel* channel, const RpcMethod& method,
   if (!status.ok()) {
     return status;
   }
+
+  start = nanos_since_midnight();
   ops.SendInitialMetadata(context->send_initial_metadata_);
+  end = nanos_since_midnight();
+  end = end - start;
+  std::cout << "ops.SendInitialMetadata  "  << end << " ns" << std::endl;
+
+  start = nanos_since_midnight();
   ops.RecvInitialMetadata(context);
+  end = nanos_since_midnight();
+  end = end - start;
+  std::cout << "ops.RecvInitialMetadata  "  << end << " ns" << std::endl;
+
+  start = nanos_since_midnight();
   ops.RecvMessage(result);
+  end = nanos_since_midnight();
+  end = end - start;
+  std::cout << "ops.RecvMessage  "  << end << " ns" << std::endl;
+
+  start = nanos_since_midnight();
   ops.ClientSendClose();
+  end = nanos_since_midnight();
+  end = end - start;
+  std::cout << "ops.RecvMessage  "  << end << " ns" << std::endl;
+
+  start = nanos_since_midnight();
   ops.ClientRecvStatus(context, &status);
+  end = nanos_since_midnight();
+  end = end - start;
+  std::cout << "ops.ClientRecvStatus  "  << end << " ns" << std::endl;
+
+  start = nanos_since_midnight();
   call.PerformOps(&ops);
+  end = nanos_since_midnight();
+  end = end - start;
+  std::cout << "call.PerformOps  "  << end << " ns" << std::endl;
+
+  start = nanos_since_midnight();
   GPR_ASSERT((cq.Pluck(&ops) && ops.got_message) || !status.ok());
+  end = nanos_since_midnight();
+  end = end - start;
+  std::cout << "GPR_ASSERT  "  << end << " ns" << std::endl;
+
   return status;
 }
 
