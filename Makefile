@@ -250,9 +250,9 @@ endif
 
 CFLAGS += -std=c89 -pedantic -Wsign-conversion -Wconversion -Wshadow
 ifeq ($(HAS_CXX11),true)
-CXXFLAGS += -std=c++11
+CXXFLAGS += -g -std=c++11
 else
-CXXFLAGS += -std=c++0x
+CXXFLAGS += -g -std=c++0x
 endif
 CPPFLAGS += -g -Wall -Wextra -Werror -Wno-long-long -Wno-unused-parameter
 LDFLAGS += -g
@@ -3414,11 +3414,11 @@ strip-shared: strip-shared_c strip-shared_cxx
 strip-static_c: static_c
 ifeq ($(CONFIG),opt)
 	$(E) "[STRIP]   Stripping libgpr.a"
-	$(Q) $(STRIP) $(LIBDIR)/$(CONFIG)/libgpr.a
+#	$(Q) $(STRIP) $(LIBDIR)/$(CONFIG)/libgpr.a
 	$(E) "[STRIP]   Stripping libgrpc.a"
-	$(Q) $(STRIP) $(LIBDIR)/$(CONFIG)/libgrpc.a
+#	$(Q) $(STRIP) $(LIBDIR)/$(CONFIG)/libgrpc.a
 	$(E) "[STRIP]   Stripping libgrpc_unsecure.a"
-	$(Q) $(STRIP) $(LIBDIR)/$(CONFIG)/libgrpc_unsecure.a
+#	$(Q) $(STRIP) $(LIBDIR)/$(CONFIG)/libgrpc_unsecure.a
 ifeq ($(HAS_ZOOKEEPER),true)
 	$(E) "[STRIP]   Stripping libgrpc_zookeeper.a"
 	$(Q) $(STRIP) $(LIBDIR)/$(CONFIG)/libgrpc_zookeeper.a
@@ -3428,19 +3428,19 @@ endif
 strip-static_cxx: static_cxx
 ifeq ($(CONFIG),opt)
 	$(E) "[STRIP]   Stripping libgrpc++.a"
-	$(Q) $(STRIP) $(LIBDIR)/$(CONFIG)/libgrpc++.a
+#	$(Q) $(STRIP) $(LIBDIR)/$(CONFIG)/libgrpc++.a
 	$(E) "[STRIP]   Stripping libgrpc++_unsecure.a"
-	$(Q) $(STRIP) $(LIBDIR)/$(CONFIG)/libgrpc++_unsecure.a
+#	$(Q) $(STRIP) $(LIBDIR)/$(CONFIG)/libgrpc++_unsecure.a
 endif
 
 strip-shared_c: shared_c
 ifeq ($(CONFIG),opt)
 	$(E) "[STRIP]   Stripping libgpr.so"
-	$(Q) $(STRIP) $(LIBDIR)/$(CONFIG)/libgpr.$(SHARED_EXT)
+#	$(Q) $(STRIP) $(LIBDIR)/$(CONFIG)/libgpr.$(SHARED_EXT)
 	$(E) "[STRIP]   Stripping libgrpc.so"
-	$(Q) $(STRIP) $(LIBDIR)/$(CONFIG)/libgrpc.$(SHARED_EXT)
+#	$(Q) $(STRIP) $(LIBDIR)/$(CONFIG)/libgrpc.$(SHARED_EXT)
 	$(E) "[STRIP]   Stripping libgrpc_unsecure.so"
-	$(Q) $(STRIP) $(LIBDIR)/$(CONFIG)/libgrpc_unsecure.$(SHARED_EXT)
+#	$(Q) $(STRIP) $(LIBDIR)/$(CONFIG)/libgrpc_unsecure.$(SHARED_EXT)
 ifeq ($(HAS_ZOOKEEPER),true)
 	$(E) "[STRIP]   Stripping libgrpc_zookeeper.so"
 	$(Q) $(STRIP) $(LIBDIR)/$(CONFIG)/libgrpc_zookeeper.$(SHARED_EXT)
@@ -3450,9 +3450,9 @@ endif
 strip-shared_cxx: shared_cxx
 ifeq ($(CONFIG),opt)
 	$(E) "[STRIP]   Stripping libgrpc++.so"
-	$(Q) $(STRIP) $(LIBDIR)/$(CONFIG)/libgrpc++.$(SHARED_EXT)
+#	$(Q) $(STRIP) $(LIBDIR)/$(CONFIG)/libgrpc++.$(SHARED_EXT)
 	$(E) "[STRIP]   Stripping libgrpc++_unsecure.so"
-	$(Q) $(STRIP) $(LIBDIR)/$(CONFIG)/libgrpc++_unsecure.$(SHARED_EXT)
+#	$(Q) $(STRIP) $(LIBDIR)/$(CONFIG)/libgrpc++_unsecure.$(SHARED_EXT)
 endif
 
 strip-shared_csharp: shared_csharp
