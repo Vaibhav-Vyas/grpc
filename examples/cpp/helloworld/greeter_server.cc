@@ -51,12 +51,14 @@ using helloworld::HelloRequestDouble;
 using helloworld::HelloRequestComplex;
 using helloworld::Greeter;
 
+extern uint64_t nanos_since_midnight();
+
 // Logic and data behind the server's behavior.
 class GreeterServiceImpl final : public Greeter::Service {
   Status SayHello(ServerContext* context, const HelloRequest* request,
                   HelloReply* reply) override {
     std::string prefix("Hello ");
-    reply->set_message(prefix + request->name()); 
+    reply->set_message(prefix + request->name());
     return Status::OK;
   }
 
@@ -115,17 +117,42 @@ class GreeterServiceImpl final : public Greeter::Service {
 };
 
 void RunServer() {
+  uint64_t start, end, start0, end0;
+
+  start0 = nanos_since_midnight();
+  start = nanos_since_midnight();
   std::string server_address("0.0.0.0:50051");
+  end = nanos_since_midnight();
+  std::cout << "server_address " << end - start << " ns" << std::endl;
+
+  start = nanos_since_midnight();
   GreeterServiceImpl service;
+  end = nanos_since_midnight();
+  std::cout << "GreeterServiceImpl service " << end - start << " ns" << std::endl;
 
   ServerBuilder builder;
   // Listen on the given address without any authentication mechanism.
+  start = nanos_since_midnight();
   builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
+  end = nanos_since_midnight();
+  std::cout << "ServerBuilder.AddListeningPort " << end -start << " ns" << std::endl;
+
   // Register "service" as the instance through which we'll communicate with
   // clients. In this case it corresponds to an *synchronous* service.
+  start = nanos_since_midnight();
   builder.RegisterService(&service);
+  end = nanos_since_midnight();
+  std::cout << "ServerBuilder.RegisterService " << end - start << " ns" << std::endl;
+
   // Finally assemble the server.
+  start = nanos_since_midnight();
   std::unique_ptr<Server> server(builder.BuildAndStart());
+  end = nanos_since_midnight();
+  std::cout << "assemble the server " << end - start << " ns" << std::endl;
+
+  end0 = nanos_since_midnight();
+  std::cout << "Total setup overhead " << end0 - start0 << " ns" << std::endl;
+
   std::cout << "Server listening on " << server_address << std::endl;
 
   // Wait for the server to shutdown. Note that some other thread must be
@@ -134,6 +161,7 @@ void RunServer() {
 }
 
 int main(int argc, char** argv) {
+
   RunServer();
 
   return 0;
