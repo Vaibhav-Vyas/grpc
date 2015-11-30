@@ -375,7 +375,7 @@ measureRoundTripTime(GreeterClient *pGreeter,
     double salaryManager = 241041.85;
 
 
-
+/*
     cout << "================================================" << std::endl;
     cout << "7) Measuring GRPC Bandwidth for large packets." << std::endl;
     cout << "================================================" << std::endl;
@@ -400,6 +400,7 @@ measureRoundTripTime(GreeterClient *pGreeter,
         float sumBytesMB = (float)sumBytes * 1.0 / (1024 * 1024.0);
         float totalTimeTakeSec = (diffNanoSec  / (1024 * 1024.0 * 1024));
         float bwMBps = (float)sumBytesMB / totalTimeTakeSec;
+*/
 /*
         printf("***********************************\n");
         printf(" Bandwidth Summary.\n");
@@ -412,7 +413,7 @@ measureRoundTripTime(GreeterClient *pGreeter,
         printf("\t * Bandwidth (MBps) =,%f,\n", bwMBps);
         printf("***********************************\n");
 */
-
+/*
         sprintf(result, "* BW: Large Msg: Attempts:%d),Packet Size=,%ld, Total Sent(bytes)=,%llu,Total Sent (MB)=,%f,Time taken(nanosec)=,%llu, Time taken (seconds) = %f,Bandwidth (MBps) =,%f,\n",
                   loopCount, bytesPerPacket[i], (unsigned long long)(sumBytes),
                   sumBytesMB, (long long unsigned int)diffNanoSec, totalTimeTakeSec, bwMBps);
@@ -425,7 +426,7 @@ measureRoundTripTime(GreeterClient *pGreeter,
     
     if (1)
       return 0;
-
+*/
     cout << "================================================" << std::endl;
     cout << "1.a) Measuring GRPC Marshall time for integers." << std::endl;
     cout << "================================================" << std::endl;
