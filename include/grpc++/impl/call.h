@@ -38,6 +38,7 @@
 #include <memory>
 #include <map>
 #include <cstring>
+#include <iostream>
 
 #include <grpc/support/alloc.h>
 #include <grpc++/client_context.h>
@@ -45,6 +46,8 @@
 #include <grpc++/impl/serialization_traits.h>
 #include <grpc++/support/config.h>
 #include <grpc++/support/status.h>
+
+extern uint64_t nanos_since_midnight();
 
 struct grpc_call;
 struct grpc_op;
@@ -157,6 +160,9 @@ class CallOpSendInitialMetadata {
 
  protected:
   void AddOp(grpc_op* ops, size_t* nops) {
+	uint64_t start, end;
+
+	start = nanos_since_midnight();
     if (!send_) return;
     grpc_op* op = &ops[(*nops)++];
     op->op = GRPC_OP_SEND_INITIAL_METADATA;
@@ -164,6 +170,9 @@ class CallOpSendInitialMetadata {
     op->reserved = NULL;
     op->data.send_initial_metadata.count = initial_metadata_count_;
     op->data.send_initial_metadata.metadata = initial_metadata_;
+    end = nanos_since_midnight();
+    std::cout << "	call.h: CallOpSendInitialMetadata AddOp " << end - start << " ns" << std::endl;
+
   }
   void FinishOp(bool* status, int max_message_size) {
     if (!send_) return;
@@ -191,6 +200,9 @@ class CallOpSendMessage {
 
  protected:
   void AddOp(grpc_op* ops, size_t* nops) {
+	uint64_t start, end;
+
+	start = nanos_since_midnight();
     if (send_buf_ == nullptr) return;
     grpc_op* op = &ops[(*nops)++];
     op->op = GRPC_OP_SEND_MESSAGE;
@@ -199,6 +211,8 @@ class CallOpSendMessage {
     op->data.send_message = send_buf_;
     // Flags are per-message: clear them after use.
     write_options_.Clear();
+    end = nanos_since_midnight();
+    std::cout << "	call.h: CallOpSendMessage AddOp " << end - start << " ns" << std::endl;
   }
   void FinishOp(bool* status, int max_message_size) {
     if (own_buf_) grpc_byte_buffer_destroy(send_buf_);
@@ -356,11 +370,16 @@ class CallOpServerSendStatus {
   void ServerSendStatus(
       const std::multimap<grpc::string, grpc::string>& trailing_metadata,
       const Status& status) {
+	uint64_t start, end;
+
+	start = nanos_since_midnight();
     trailing_metadata_count_ = trailing_metadata.size();
     trailing_metadata_ = FillMetadataArray(trailing_metadata);
     send_status_available_ = true;
     send_status_code_ = static_cast<grpc_status_code>(status.error_code());
     send_status_details_ = status.error_message();
+    end = nanos_since_midnight();
+    std::cout << "	call.h: CallOpServerSendStatus ServerSendStatus " << end - start << " ns" << std::endl;
   }
 
  protected:
