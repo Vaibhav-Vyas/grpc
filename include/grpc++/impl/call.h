@@ -47,6 +47,7 @@
 #include <grpc++/support/config.h>
 #include <grpc++/support/status.h>
 
+extern int add_func_stats(std::string funcName, uint64_t start_ns, uint64_t duration_ns);
 extern uint64_t nanos_since_midnight();
 
 struct grpc_call;
@@ -172,7 +173,7 @@ class CallOpSendInitialMetadata {
     op->data.send_initial_metadata.metadata = initial_metadata_;
     end = nanos_since_midnight();
     std::cout << "	call.h: CallOpSendInitialMetadata AddOp " << end - start << " ns" << std::endl;
-
+    add_func_stats(std::string(__FILE__) + " call.h: CallOpSendInitialMetadata AddOp", start, end);
   }
   void FinishOp(bool* status, int max_message_size) {
     if (!send_) return;
@@ -213,6 +214,7 @@ class CallOpSendMessage {
     write_options_.Clear();
     end = nanos_since_midnight();
     std::cout << "	call.h: CallOpSendMessage AddOp " << end - start << " ns" << std::endl;
+    add_func_stats(std::string(__FILE__) + " CallOpSendMessage AddOp", start, end);
   }
   void FinishOp(bool* status, int max_message_size) {
     if (own_buf_) grpc_byte_buffer_destroy(send_buf_);
@@ -380,6 +382,7 @@ class CallOpServerSendStatus {
     send_status_details_ = status.error_message();
     end = nanos_since_midnight();
     std::cout << "	call.h: CallOpServerSendStatus ServerSendStatus " << end - start << " ns" << std::endl;
+    add_func_stats(std::string(__FILE__) + " CallOpServerSendStatus ServerSendStatus ", start, end);
   }
 
  protected:

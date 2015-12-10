@@ -51,6 +51,8 @@ using helloworld::HelloRequestComplex;
 using helloworld::HelloReply;
 using helloworld::Greeter;
 
+extern void print_all_profile_stats();
+
 class GreeterClient {
  public:
   GreeterClient(std::shared_ptr<Channel> channel)
@@ -350,6 +352,7 @@ int main(int argc, char** argv) {
                        servIPPort,
                        gccOptimizationMode,
                        maxAttempts); 
+  print_all_profile_stats();
 }
 
 int
