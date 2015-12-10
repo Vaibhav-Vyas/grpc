@@ -40,6 +40,27 @@
 #include <iostream>
 #include <time.h>       /* timer */
 
+struct FuncStats
+{
+    std::string funcName;
+    uint64_t start_ns;
+    uint64_t duration_ns;
+
+    FuncStats(std::string fName, uint64_t start_nsec, uint64_t duration_nsec)
+    {
+        funcName = fName;
+        start_ns = start_nsec;
+        duration_ns = duration_nsec;
+    }
+};
+
+std::vector<FuncStats> funcProfiler;
+
+int add_func_stats(std::string funcName, uint64_t start_ns, uint64_t duration_ns)
+{
+    funcProfiler.push_back(FuncStats(funcName, start_ns, duration_ns) );
+    return 0;
+}
 
 //to get the time
 uint64_t nanos_since_midnight()
