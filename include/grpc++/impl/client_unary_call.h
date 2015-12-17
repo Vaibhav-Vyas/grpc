@@ -40,29 +40,46 @@
 #include <iostream>
 #include <time.h>       /* timer */
 
+#define GRPC_PROFILE_DEBUG_MODE     1
+
 struct FuncStats
 {
     std::string funcName;
+    std::string fileName;
+    std::string description;
     uint64_t start_ns;
+    uint64_t end_ns;
     uint64_t duration_ns;
 
     FuncStats()
     {
     }
 
-    FuncStats(std::string fName, uint64_t start_nsec, uint64_t duration_nsec)
+    FuncStats(std::string func_name, uint64_t start_nsec, uint64_t end_nsec, std::string file_name = "", std::string desc = "")
     {
-        funcName = fName;
+        funcName = func_name;
         start_ns = start_nsec;
-        duration_ns = duration_nsec;
+        end_ns = end_nsec;
+        duration_ns = start_nsec - end_nsec;
+        fileName = file_name.length ? file_name : " ";
+        description = desc.length ? desc : " ";
     }
 };
 
 std::vector<FuncStats> funcProfiler;
 
-int add_func_stats(std::string funcName, uint64_t start_ns, uint64_t duration_ns)
+int add_func_stats(std::string func_name, uint64_t start_ns, uint64_t end_nsec, std::string file_name = "", std::string desc = "")
 {
-    funcProfiler.push_back(FuncStats(funcName, start_ns, duration_ns) );
+    FuncStats currFuncStat(func_name, start_ns, end_nsec, file_name, desc);
+
+    if (GRPC_PROFILE_DEBUG_MODE)
+    {
+        cout << func_name << ", Start:" << currFuncStat.start_ns << " ns,"  \
+            << ", Duration:" << currFuncStat.duration_ns << " ns,"          \
+            << ", Description:" << currFuncStat.description << ","          \
+            << ", FileName:" << currFuncStat.fileName << std::endl;
+    }
+    funcProfiler.push_back(currFuncStat);
     return 0;
 }
 
@@ -80,7 +97,7 @@ void print_all_profile_stats()
 //to get the time
 uint64_t nanos_since_midnight()
 {
-	return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
 namespace grpc {
@@ -110,51 +127,37 @@ Status BlockingUnaryCall(Channel* channel, const RpcMethod& method,
   start = nanos_since_midnight();
   ops.SendInitialMetadata(context->send_initial_metadata_);
   end = nanos_since_midnight();
-  end = end - start;
-  std::cout << "ops.SendInitialMetadata  "  << end << " ns" << std::endl;
-  add_func_stats(std::string(__FILE__) + " ops.SendInitialMetadata", start, end);
+  add_func_stats(" ops.SendInitialMetadata", start, end, std::string(__FILE__), "ops.SendInitialMetadata  ");
 
   start = nanos_since_midnight();
   ops.RecvInitialMetadata(context);
   end = nanos_since_midnight();
-  end = end - start;
-  std::cout << "ops.RecvInitialMetadata  "  << end << " ns" << std::endl;
-  add_func_stats(std::string(__FILE__) + " ops.RecvInitialMetadata", start, end);
+  add_func_stats(" ops.RecvInitialMetadata", start, end, std::string(__FILE__), "ops.RecvInitialMetadata  ");
 
   start = nanos_since_midnight();
   ops.RecvMessage(result);
   end = nanos_since_midnight();
-  end = end - start;
-  std::cout << "ops.RecvMessage  "  << end << " ns" << std::endl;
-  add_func_stats(std::string(__FILE__) + " ops.RecvMessage", start, end);
+  add_func_stats(" ops.RecvMessage", start, end, std::string(__FILE__), "ops.RecvMessage  ");
 
   start = nanos_since_midnight();
   ops.ClientSendClose();
   end = nanos_since_midnight();
-  end = end - start;
-  std::cout << "ops.ClientSendClose  "  << end << " ns" << std::endl;
-  add_func_stats(std::string(__FILE__) + " ops.ClientSendClose", start, end);
+  add_func_stats(" ops.ClientSendClose", start, end, std::string(__FILE__), "ops.ClientSendClose  ");
 
   start = nanos_since_midnight();
   ops.ClientRecvStatus(context, &status);
   end = nanos_since_midnight();
-  end = end - start;
-  std::cout << "ops.ClientRecvStatus  "  << end << " ns" << std::endl;
-  add_func_stats(std::string(__FILE__) + " ops.ClientRecvStatus", start, end);
+  add_func_stats(" ops.ClientRecvStatus", start, end, std::string(__FILE__), "ops.ClientRecvStatus  ");
 
   start = nanos_since_midnight();
   call.PerformOps(&ops);
   end = nanos_since_midnight();
-  end = end - start;
-  std::cout << "call.PerformOps  "  << end << " ns" << std::endl;
-  add_func_stats(std::string(__FILE__) + " ops.PerformOps", start, end);
+  add_func_stats(" ops.PerformOps", start, end, std::string(__FILE__), "call.PerformOps  ");
 
   start = nanos_since_midnight();
   GPR_ASSERT((cq.Pluck(&ops) && ops.got_message) || !status.ok());
   end = nanos_since_midnight();
-  end = end - start;
-  std::cout << "cq.Pluck(&ops)  "  << end << " ns" << std::endl;
-  add_func_stats(std::string(__FILE__) + " cq.Pluck(&ops)", start, end);
+  add_func_stats(" cq.Pluck(&ops)", start, end, std::string(__FILE__), "cq.Pluck(&ops)  ");
 
   return status;
 }
