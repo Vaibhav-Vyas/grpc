@@ -323,7 +323,7 @@ measureRoundTripTime(GreeterClient *pGreeter,
 
 int main(int argc, char** argv) {
   int gccOptimizationMode;
-  int maxAttempts = 100;
+  int maxAttempts = 1;
   char servIPPort[25] = {0};
   int rc = 0;
 
@@ -447,6 +447,8 @@ measureRoundTripTime(GreeterClient *pGreeter,
     }
     createCSVReport(experimentTitle, maxAttempts, &strMsg);
 
+//    if (1)
+//      return 0;
 
     cout << "================================================" << std::endl;
     cout << "1.b) Measuring GRPC Marshall time for Doubles." << std::endl;

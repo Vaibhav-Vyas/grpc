@@ -172,7 +172,8 @@ class CallOpSendInitialMetadata {
     op->data.send_initial_metadata.count = initial_metadata_count_;
     op->data.send_initial_metadata.metadata = initial_metadata_;
     end = nanos_since_midnight();
-    std::cout << "	call.h: CallOpSendInitialMetadata AddOp " << end - start << " ns" << std::endl;
+    end = end - start;
+    std::cout << "	call.h: CallOpSendInitialMetadata AddOp " << end << " ns" << std::endl;
     add_func_stats(std::string(__FILE__) + " call.h: CallOpSendInitialMetadata AddOp", start, end);
   }
   void FinishOp(bool* status, int max_message_size) {
@@ -213,7 +214,8 @@ class CallOpSendMessage {
     // Flags are per-message: clear them after use.
     write_options_.Clear();
     end = nanos_since_midnight();
-    std::cout << "	call.h: CallOpSendMessage AddOp " << end - start << " ns" << std::endl;
+    end = end - start;
+    std::cout << "	call.h: CallOpSendMessage AddOp " << end << " ns" << std::endl;
     add_func_stats(std::string(__FILE__) + " CallOpSendMessage AddOp", start, end);
   }
   void FinishOp(bool* status, int max_message_size) {
@@ -381,7 +383,8 @@ class CallOpServerSendStatus {
     send_status_code_ = static_cast<grpc_status_code>(status.error_code());
     send_status_details_ = status.error_message();
     end = nanos_since_midnight();
-    std::cout << "	call.h: CallOpServerSendStatus ServerSendStatus " << end - start << " ns" << std::endl;
+    end = end - start;
+    std::cout << "	call.h: CallOpServerSendStatus ServerSendStatus " << end << " ns" << std::endl;
     add_func_stats(std::string(__FILE__) + " CallOpServerSendStatus ServerSendStatus ", start, end);
   }
 
