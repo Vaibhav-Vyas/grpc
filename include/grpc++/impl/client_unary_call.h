@@ -138,15 +138,29 @@ template <class InputMessage, class OutputMessage>
 Status BlockingUnaryCall(Channel* channel, const RpcMethod& method,
                          ClientContext* context, const InputMessage& request,
                          OutputMessage* result) {
+  // Profile function
+  start = nanos_since_midnight();
   CompletionQueue cq;
   Call call(channel->CreateCall(method, context, &cq));
+  end = nanos_since_midnight();
+  add_func_stats(" Call call(channel->CreateCall(method, context, &cq))", start, end, std::string(__FILE__), "Initializes obj to create a new call to given method.");
+
+  // Profile function
+  start = nanos_since_midnight();
   CallOpSet<CallOpSendInitialMetadata, CallOpSendMessage,
             CallOpRecvInitialMetadata, CallOpRecvMessage<OutputMessage>,
             CallOpClientSendClose, CallOpClientRecvStatus> ops;
+  end = nanos_since_midnight();
+  add_func_stats("CallOpSet<SendInitMetadata,SendMsg, RecvInitMetadata,RecvMsg,ClientSendClose, ClientRecvStatus>", start, end, std::string(__FILE__), "Initializes 6 template classes. Primary implementation of CallOpSetInterface.");
+
+  // Profile function
+  start = nanos_since_midnight();
   Status status = ops.SendMessage(request);
   if (!status.ok()) {
     return status;
   }
+  end = nanos_since_midnight();
+  add_func_stats("ops.SendMessage(request);", start, end, std::string(__FILE__), "Serializes the message and stores in local send buffer.");
 
   start = nanos_since_midnight();
   ops.SendInitialMetadata(context->send_initial_metadata_);
