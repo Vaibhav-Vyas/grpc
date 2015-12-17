@@ -60,21 +60,21 @@ struct FuncStats
         funcName = func_name;
         start_ns = start_nsec;
         end_ns = end_nsec;
-        duration_ns = start_nsec - end_nsec;
-        fileName = file_name.length ? file_name : " ";
-        description = desc.length ? desc : " ";
+        duration_ns = end_nsec - start_nsec;
+        fileName = (file_name.length() > 0) ? file_name : " ";
+        description = (desc.length() > 0) ? desc : " ";
     }
 };
 
 std::vector<FuncStats> funcProfiler;
 
-int add_func_stats(std::string func_name, uint64_t start_ns, uint64_t end_nsec, std::string file_name = "", std::string desc = "")
+int add_func_stats(std::string func_name, uint64_t start_ns, uint64_t end_nsec, std::string file_name, std::string desc)
 {
     FuncStats currFuncStat(func_name, start_ns, end_nsec, file_name, desc);
 
     if (GRPC_PROFILE_DEBUG_MODE)
     {
-        cout << func_name << ", Start:" << currFuncStat.start_ns << " ns,"  \
+        std::cout << func_name << ", Start:" << currFuncStat.start_ns << " ns,"  \
             << ", Duration:" << currFuncStat.duration_ns << " ns,"          \
             << ", Description:" << currFuncStat.description << ","          \
             << ", FileName:" << currFuncStat.fileName << std::endl;
