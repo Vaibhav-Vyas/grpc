@@ -33,6 +33,7 @@
 
 #include <grpc++/impl/sync.h>
 #include <grpc++/impl/thd.h>
+extern void print_all_profile_stats();
 
 #include "src/cpp/server/dynamic_thread_pool.h"
 
@@ -63,9 +64,14 @@ void DynamicThreadPool::ThreadFunc() {
   for (;;) {
     // Wait until work is available or we are shutting down.
     grpc::unique_lock<grpc::mutex> lock(mu_);
+
+    print_all_profile_stats();
+
     if (!shutdown_ && callbacks_.empty()) {
       // If there are too many threads waiting, then quit this thread
       if (threads_waiting_ >= reserve_threads_) {
+
+    	print_all_profile_stats();
         break;
       }
       threads_waiting_++;

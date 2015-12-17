@@ -48,6 +48,8 @@
 
 #include "src/core/profiling/timers.h"
 #include "src/cpp/server/thread_pool_interface.h"
+extern int add_func_stats(std::string funcName, uint64_t start_ns, uint64_t duration_ns);
+extern uint64_t nanos_since_midnight();
 
 namespace grpc {
 
@@ -420,12 +422,19 @@ void Server::Wait() {
 }
 
 void Server::PerformOpsOnCall(CallOpSetInterface* ops, Call* call) {
+
+  uint64_t start, end;
   static const size_t MAX_OPS = 8;
+
+  start = nanos_since_midnight();
   size_t nops = 0;
   grpc_op cops[MAX_OPS];
   ops->FillOps(cops, &nops);
   auto result = grpc_call_start_batch(call->call(), cops, nops, ops, nullptr);
   GPR_ASSERT(GRPC_CALL_OK == result);
+  end = nanos_since_midnight();
+  add_func_stats(std::string(__FILE__) + " Server::PerformOpsOnCall", start, end -start);
+
 }
 
 Server::BaseAsyncRequest::BaseAsyncRequest(
