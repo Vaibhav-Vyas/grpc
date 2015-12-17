@@ -172,7 +172,12 @@ class CallOpSendInitialMetadata {
     op->data.send_initial_metadata.count = initial_metadata_count_;
     op->data.send_initial_metadata.metadata = initial_metadata_;
     end = nanos_since_midnight();
+<<<<<<< HEAD
+//    std::cout << "	call.h: CallOpSendInitialMetadata AddOp " << end - start << " ns" << std::endl;
+    add_func_stats(std::string(__FILE__) + " call.h: CallOpSendInitialMetadata AddOp after send status changed to true", start, end-start);
+=======
     add_func_stats("CallOpSendInitialMetadata AddOp", start, end, std::string(__FILE__), "	call.h: CallOpSendInitialMetadata AddOp ");
+>>>>>>> origin/master
   }
   void FinishOp(bool* status, int max_message_size) {
     if (!send_) return;
@@ -212,7 +217,12 @@ class CallOpSendMessage {
     // Flags are per-message: clear them after use.
     write_options_.Clear();
     end = nanos_since_midnight();
+<<<<<<< HEAD
+//    std::cout << "	call.h: CallOpSendMessage AddOp " << end - start << " ns" << std::endl;
+    add_func_stats(std::string(__FILE__) + " CallOpSendMessage AddOp", start, end-start);
+=======
     add_func_stats(" CallOpSendMessage AddOp", start, end, std::string(__FILE__), "	call.h: CallOpSendMessage AddOp ");
+>>>>>>> origin/master
   }
   void FinishOp(bool* status, int max_message_size) {
     if (own_buf_) grpc_byte_buffer_destroy(send_buf_);
@@ -379,7 +389,12 @@ class CallOpServerSendStatus {
     send_status_code_ = static_cast<grpc_status_code>(status.error_code());
     send_status_details_ = status.error_message();
     end = nanos_since_midnight();
+<<<<<<< HEAD
+//    std::cout << "	call.h: CallOpServerSendStatus ServerSendStatus " << end - start << " ns" << std::endl;
+    add_func_stats(std::string(__FILE__) + " CallOpServerSendStatus ServerSendStatus, file trailing_metadata array, change send_status to true, add send_status code/details ", start, end-start);
+=======
     add_func_stats(" CallOpServerSendStatus ServerSendStatus ", start, end, std::string(__FILE__), "	call.h: CallOpServerSendStatus ServerSendStatus ");
+>>>>>>> origin/master
   }
 
  protected:
