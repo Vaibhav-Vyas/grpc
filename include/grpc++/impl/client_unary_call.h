@@ -42,6 +42,28 @@
 
 #define GRPC_PROFILE_DEBUG_MODE     1
 
+#include <stdint.h>
+
+//  Windows
+#ifdef _WIN32
+
+	#include <intrin.h>
+	uint64_t rdtsc(){
+		return __rdtsc();
+	}
+
+//  Linux/GCC
+#else
+
+	uint64_t rdtsc(){
+		unsigned int lo,hi;
+		__asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
+		return ((uint64_t)hi << 32) | lo;
+	}
+
+#endif
+
+
 struct FuncStats
 {
     std::string funcName;
@@ -74,10 +96,12 @@ int add_func_stats(std::string func_name, uint64_t start_ns, uint64_t end_nsec, 
 
     if (GRPC_PROFILE_DEBUG_MODE)
     {
-        std::cout << func_name << ", Start:" << currFuncStat.start_ns << " ns,"  \
-            << ", Duration:" << currFuncStat.duration_ns << " ns,"          \
-            << ", Description:" << currFuncStat.description << ","          \
-            << ", FileName:" << currFuncStat.fileName << std::endl;
+        std::cout << func_name												\
+        	<< ", Start:" << currFuncStat.start_ns << " ns,"  				\
+			<< ", End:" << currFuncStat.end_ns << " ns,"  				\
+            << " Duration:" << currFuncStat.duration_ns << " ns,"          \
+            << " Description:" << currFuncStat.description << ","          \
+            << " FileName:" << currFuncStat.fileName << std::endl;
     }
     funcProfiler.push_back(currFuncStat);
     return 0;
@@ -97,7 +121,7 @@ void print_all_profile_stats()
 //to get the time
 uint64_t nanos_since_midnight()
 {
-    return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    return rdtsc();//std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
 namespace grpc {
