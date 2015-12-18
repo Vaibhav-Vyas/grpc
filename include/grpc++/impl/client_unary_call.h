@@ -60,7 +60,7 @@ Status BlockingUnaryCall(Channel* channel, const RpcMethod& method,
   CompletionQueue cq;
   Call call(channel->CreateCall(method, context, &cq));
   end = nanos_since_midnight();
-  add_func_stats(" Call call(channel->CreateCall(method, context, &cq))", start, end, std::string(__FILE__), "Initializes obj to create a new call to given method.");
+  add_func_stats("Call call(channel->CreateCall(method; context; &cq))", start, end, std::string(__FILE__), "Initializes obj to create a new call to given method.");
 
   // Profile function
   start = nanos_since_midnight();
@@ -68,7 +68,7 @@ Status BlockingUnaryCall(Channel* channel, const RpcMethod& method,
             CallOpRecvInitialMetadata, CallOpRecvMessage<OutputMessage>,
             CallOpClientSendClose, CallOpClientRecvStatus> ops;
   end = nanos_since_midnight();
-  add_func_stats("CallOpSet<SendInitMetadata,SendMsg, RecvInitMetadata,RecvMsg,ClientSendClose, ClientRecvStatus>", start, end, std::string(__FILE__), "Initializes 6 template classes. Primary implementation of CallOpSetInterface.");
+  add_func_stats("CallOpSet<SendInitMetadata;SendMsg; RecvInitMetadata;RecvMsg;ClientSendClose; ClientRecvStatus>", start, end, std::string(__FILE__), "Initializes 6 template classes. Primary implementation of CallOpSetInterface.");
 
   // Profile function
   start = nanos_since_midnight();
@@ -82,37 +82,37 @@ Status BlockingUnaryCall(Channel* channel, const RpcMethod& method,
   start = nanos_since_midnight();
   ops.SendInitialMetadata(context->send_initial_metadata_);
   end = nanos_since_midnight();
-  add_func_stats(" ops.SendInitialMetadata", start, end, std::string(__FILE__), "ops.SendInitialMetadata  ");
+  add_func_stats("ops.SendInitialMetadata", start, end, std::string(__FILE__), "ops.SendInitialMetadata  ");
 
   start = nanos_since_midnight();
   ops.RecvInitialMetadata(context);
   end = nanos_since_midnight();
-  add_func_stats(" ops.RecvInitialMetadata", start, end, std::string(__FILE__), "ops.RecvInitialMetadata  ");
+  add_func_stats("ops.RecvInitialMetadata", start, end, std::string(__FILE__), "ops.RecvInitialMetadata  ");
 
   start = nanos_since_midnight();
   ops.RecvMessage(result);
   end = nanos_since_midnight();
-  add_func_stats(" ops.RecvMessage", start, end, std::string(__FILE__), "ops.RecvMessage  ");
+  add_func_stats("ops.RecvMessage", start, end, std::string(__FILE__), "ops.RecvMessage  ");
 
   start = nanos_since_midnight();
   ops.ClientSendClose();
   end = nanos_since_midnight();
-  add_func_stats(" ops.ClientSendClose", start, end, std::string(__FILE__), "ops.ClientSendClose  ");
+  add_func_stats("ops.ClientSendClose", start, end, std::string(__FILE__), "ops.ClientSendClose  ");
 
   start = nanos_since_midnight();
   ops.ClientRecvStatus(context, &status);
   end = nanos_since_midnight();
-  add_func_stats(" ops.ClientRecvStatus", start, end, std::string(__FILE__), "ops.ClientRecvStatus  ");
+  add_func_stats("ops.ClientRecvStatus", start, end, std::string(__FILE__), "ops.ClientRecvStatus  ");
 
   start = nanos_since_midnight();
   call.PerformOps(&ops);
   end = nanos_since_midnight();
-  add_func_stats(" ops.PerformOps", start, end, std::string(__FILE__), "call.PerformOps  ");
+  add_func_stats("ops.PerformOps", start, end, std::string(__FILE__), "call.PerformOps  ");
 
   start = nanos_since_midnight();
   GPR_ASSERT((cq.Pluck(&ops) && ops.got_message) || !status.ok());
   end = nanos_since_midnight();
-  add_func_stats(" cq.Pluck(&ops)", start, end, std::string(__FILE__), "cq.Pluck(&ops)  ");
+  (" cq.Pluck(&ops)", start, end, std::string(__FILE__), "cq.Pluck(&ops)  ");
 
   return status;
 }

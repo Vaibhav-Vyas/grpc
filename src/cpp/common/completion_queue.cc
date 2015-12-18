@@ -38,6 +38,9 @@
 #include <grpc/support/log.h>
 #include <grpc++/support/time.h>
 
+extern int add_func_stats(std::string funcName, uint64_t start_ns, uint64_t end_nsec, std::string fName = "", std::string desc = "");
+extern uint64_t nanos_since_midnight();
+
 namespace grpc {
 
 CompletionQueue::CompletionQueue() {
@@ -72,12 +75,30 @@ CompletionQueue::NextStatus CompletionQueue::AsyncNextInternal(
 }
 
 bool CompletionQueue::Pluck(CompletionQueueTag* tag) {
+  uint64_t start, end;
+
+  start = nanos_since_midnight();
   auto deadline = gpr_inf_future(GPR_CLOCK_REALTIME);
+  end = nanos_since_midnight();
+  add_func_stats("CompletionQueue::Pluck -> gpr_inf_future(GPR_CLOCK_REALTIME);", start, end, std::string(__FILE__),
+		  "gpr_inf_future(GPR_CLOCK_REALTIME): Obtain Time deadline");
+
+  start = nanos_since_midnight();
   auto ev = grpc_completion_queue_pluck(cq_, tag, deadline, nullptr);
   bool ok = ev.success != 0;
+  end = nanos_since_midnight();
+    add_func_stats("CompletionQueue::Pluck -> grpc_completion_queue_pluck(cq_; deadline);", start, end, std::string(__FILE__),
+    		"grpc_completion_queue_pluck(cq_; deadline): Keep Polling the completion queue for result");
+
   void* ignored = tag;
+
+  start = nanos_since_midnight();
   GPR_ASSERT(tag->FinalizeResult(&ignored, &ok));
   GPR_ASSERT(ignored == tag);
+  end = nanos_since_midnight();
+    add_func_stats("CompletionQueue::Pluck -> tag->FinalizeResult(&ignored; &ok);", start, end, std::string(__FILE__),
+    		"tag->FinalizeResult(&ignored; &ok): Finalise the result");
+
   // Ignore mutations by FinalizeResult: Pluck returns the C API status
   return ev.success != 0;
 }

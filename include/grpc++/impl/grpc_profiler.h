@@ -57,12 +57,14 @@ int add_func_stats(std::string func_name, uint64_t start_ns, uint64_t end_nsec, 
 
     if (GRPC_PROFILE_DEBUG_MODE)
     {
-        std::cout << func_name												\
-        	<< ", Start:" << currFuncStat.start_ns << " ns,"  				\
-			<< ", End:" << currFuncStat.end_ns << " ns,"  				\
-            << " Duration:" << currFuncStat.duration_ns << " ns,"          \
+        auto const pos= currFuncStat.fileName.find_last_of('/');
+        const auto actualFileName = currFuncStat.substr(pos+1);
+
+        std::cout << func_name											   \
+        	<< ", Start:" << currFuncStat.start_ns << " ,"  			   \
+            << " Duration:" << currFuncStat.duration_ns << " ,"           \
             << " Description:" << currFuncStat.description << ","          \
-            << " FileName:" << currFuncStat.fileName << std::endl;
+            << " FileName:" << actualFileName << "\n";
     }
     funcProfiler.push_back(currFuncStat);
     return 0;
