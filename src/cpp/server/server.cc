@@ -433,8 +433,7 @@ void Server::PerformOpsOnCall(CallOpSetInterface* ops, Call* call) {
   auto result = grpc_call_start_batch(call->call(), cops, nops, ops, nullptr);
   GPR_ASSERT(GRPC_CALL_OK == result);
   end = nanos_since_midnight();
-  add_func_stats(std::string(__FILE__) + " Server::PerformOpsOnCall", start, end -start);
-
+  add_func_stats("Server::PerformOpsOnCall", start, end, std::string(__FILE__), "Does ops->FillOps(cops, &nops); and result = grpc_call_start_batch(call->call(), cops, nops, ops, nullptr);");
 }
 
 Server::BaseAsyncRequest::BaseAsyncRequest(
