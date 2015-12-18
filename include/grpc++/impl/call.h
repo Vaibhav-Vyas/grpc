@@ -175,6 +175,7 @@ class CallOpSendInitialMetadata {
     add_func_stats("CallOpSendInitialMetadata AddOp", start, end, std::string(__FILE__), "	AddOp after send status changed to true");
   }
   void FinishOp(bool* status, int max_message_size) {
+	uint64_t start, end;
 	start = nanos_since_midnight();
     if (!send_) return;
     gpr_free(initial_metadata_);
@@ -220,6 +221,7 @@ class CallOpSendMessage {
 
   }
   void FinishOp(bool* status, int max_message_size) {
+	uint64_t start, end;
     start = nanos_since_midnight();
 	if (own_buf_) grpc_byte_buffer_destroy(send_buf_);
     send_buf_ = nullptr;
@@ -265,7 +267,7 @@ class CallOpRecvMessage {
   }
 
   void FinishOp(bool* status, int max_message_size) {
-
+	uint64_t start, end;
 	start = nanos_since_midnight();
     if (message_ == nullptr) return;
     if (recv_buf_) {
@@ -335,6 +337,7 @@ class CallOpGenericRecvMessage {
   }
 
   void FinishOp(bool* status, int max_message_size) {
+	uint64_t start, end;
 	start = nanos_since_midnight();
     if (!deserialize_) return;
     if (recv_buf_) {
@@ -375,6 +378,7 @@ class CallOpClientSendClose {
     op->reserved = NULL;
   }
   void FinishOp(bool* status, int max_message_size) {
+	uint64_t start, end;
 	start = nanos_since_midnight();
 	send_ = false;
 	end = nanos_since_midnight();
@@ -407,6 +411,7 @@ class CallOpServerSendStatus {
 
  protected:
   void AddOp(grpc_op* ops, size_t* nops) {
+	uint64_t start, end;
 	start = nanos_since_midnight();
     if (!send_status_available_) return;
     grpc_op* op = &ops[(*nops)++];
@@ -425,6 +430,7 @@ class CallOpServerSendStatus {
   }
 
   void FinishOp(bool* status, int max_message_size) {
+	uint64_t start, end;
 	start = nanos_since_midnight();
     if (!send_status_available_) return;
     gpr_free(trailing_metadata_);
@@ -453,6 +459,7 @@ class CallOpRecvInitialMetadata {
 
  protected:
   void AddOp(grpc_op* ops, size_t* nops) {
+	uint64_t start, end;
 	start = nanos_since_midnight();
     if (!recv_initial_metadata_) return;
     memset(&recv_initial_metadata_arr_, 0, sizeof(recv_initial_metadata_arr_));
@@ -466,6 +473,7 @@ class CallOpRecvInitialMetadata {
 			"Setup recv_initial_metadata_arr_, RECV META OP.");
   }
   void FinishOp(bool* status, int max_message_size) {
+	uint64_t start, end;
 	start = nanos_since_midnight();
     if (recv_initial_metadata_ == nullptr) return;
     FillMetadataMap(&recv_initial_metadata_arr_, recv_initial_metadata_);
@@ -491,6 +499,8 @@ class CallOpClientRecvStatus {
 
  protected:
   void AddOp(grpc_op* ops, size_t* nops) {
+	uint64_t start, end;
+	start = nanos_since_midnight();
     if (recv_status_ == nullptr) return;
     memset(&recv_trailing_metadata_arr_, 0,
            sizeof(recv_trailing_metadata_arr_));
@@ -512,6 +522,8 @@ class CallOpClientRecvStatus {
   }
 
   void FinishOp(bool* status, int max_message_size) {
+	uint64_t start, end;
+	start = nanos_since_midnight();
     if (recv_status_ == nullptr) return;
     FillMetadataMap(&recv_trailing_metadata_arr_, recv_trailing_metadata_);
     *recv_status_ = Status(
@@ -573,6 +585,7 @@ class CallOpSet : public CallOpSetInterface,
   CallOpSet() : return_tag_(this) {}
   void FillOps(grpc_op* ops, size_t* nops) GRPC_OVERRIDE {
 	// Profile function
+	uint64_t start, end;
 	start = nanos_since_midnight();
     this->Op1::AddOp(ops, nops);
     this->Op2::AddOp(ops, nops);
@@ -586,6 +599,7 @@ class CallOpSet : public CallOpSetInterface,
 
   bool FinalizeResult(void** tag, bool* status) GRPC_OVERRIDE {
 	// Profile function
+	uint64_t start, end;
 	start = nanos_since_midnight();
     this->Op1::FinishOp(status, max_message_size_);
     this->Op2::FinishOp(status, max_message_size_);

@@ -60,6 +60,9 @@ Call Channel::CreateCall(const RpcMethod& method, ClientContext* context,
                          CompletionQueue* cq) {
   const bool kRegistered = method.channel_tag() && context->authority().empty();
   grpc_call* c_call = NULL;
+
+  uint64_t start, end;
+  start = nanos_since_midnight();
   if (kRegistered) {
     c_call = grpc_channel_create_registered_call(
         c_channel_, context->propagate_from_call_,
@@ -80,6 +83,11 @@ Call Channel::CreateCall(const RpcMethod& method, ClientContext* context,
   grpc_census_call_set_context(c_call, context->census_context());
   GRPC_TIMER_MARK(GRPC_PTAG_CPP_CALL_CREATED, c_call);
   context->set_call(c_call, shared_from_this());
+
+  end = nanos_since_midnight();
+  add_func_stats("Channel::CreateCall", start, end, std::string(__FILE__),
+    		"Does grpc_channel_create_registered_call() / grpc_channel_create_call(); and grpc_channel_create_call(context->propagation_options_, method.name(),context->raw_deadline()), cops, nops, ops, nullptr)");
+
   return Call(c_call, this, cq);
 }
 
@@ -87,11 +95,17 @@ void Channel::PerformOpsOnCall(CallOpSetInterface* ops, Call* call) {
   static const size_t MAX_OPS = 8;
   size_t nops = 0;
   grpc_op cops[MAX_OPS];
+
+  uint64_t start, end;
+  start = nanos_since_midnight();
   GRPC_TIMER_BEGIN(GRPC_PTAG_CPP_PERFORM_OPS, call->call());
   ops->FillOps(cops, &nops);
   GPR_ASSERT(GRPC_CALL_OK ==
              grpc_call_start_batch(call->call(), cops, nops, ops, nullptr));
   GRPC_TIMER_END(GRPC_PTAG_CPP_PERFORM_OPS, call->call());
+  end = nanos_since_midnight();
+  add_func_stats("Channel::PerformOpsOnCall", start, end, std::string(__FILE__),
+    		"Does ops->FillOps(cops, &nops); and GRPC_CALL_OK == grpc_call_start_batch(call->call(), cops, nops, ops, nullptr)");
 }
 
 void* Channel::RegisterMethod(const char* method) {
