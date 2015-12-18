@@ -40,6 +40,9 @@
 #include "src/cpp/server/thread_pool_interface.h"
 #include "src/cpp/server/fixed_size_thread_pool.h"
 
+extern uint64_t nanos_since_midnight();
+extern int add_func_stats(std::string func_name, uint64_t start_ns, uint64_t end_nsec, std::string file_name, std::string desc); 
+
 namespace grpc {
 
 ServerBuilder::ServerBuilder()
@@ -54,7 +57,11 @@ std::unique_ptr<ServerCompletionQueue> ServerBuilder::AddCompletionQueue() {
 }
 
 void ServerBuilder::RegisterService(SynchronousService* service) {
+  uint64_t start, end;
+  start = nanos_since_midnight();
   services_.emplace_back(new NamedService<RpcService>(service->service()));
+  end = nanos_since_midnight();
+  add_func_stats("services_.emplace_back(new NamedService<RpcService>(service->service()))", start, end, std::string(__FILE__), " register the server");
 }
 
 void ServerBuilder::RegisterAsyncService(AsynchronousService* service) {
@@ -87,32 +94,58 @@ void ServerBuilder::RegisterAsyncGenericService(AsyncGenericService* service) {
 void ServerBuilder::AddListeningPort(const grpc::string& addr,
                                      std::shared_ptr<ServerCredentials> creds,
                                      int* selected_port) {
+  uint64_t start, end;
+
+  start = nanos_since_midnight();
   Port port = {addr, creds, selected_port};
   ports_.push_back(port);
+  end = nanos_since_midnight();
+  add_func_stats("port, ports_.push_back(port) ", start, end, std::string(__FILE__), " add listening port");
+
 }
 
 std::unique_ptr<Server> ServerBuilder::BuildAndStart() {
   bool thread_pool_owned = false;
+
+  uint64_t start, end;
+  start = nanos_since_midnight();
   if (!async_services_.empty() && !services_.empty()) {
     gpr_log(GPR_ERROR, "Mixing async and sync services is unsupported for now");
     return nullptr;
   }
+  end = nanos_since_midnight();
+  add_func_stats("if (!async_services_.empty() && !services_.empty())",start, end, std::string(__FILE__), " check if mixing async and sync services, stop if yes");
+
   if (!thread_pool_ && !services_.empty()) {
+	start = nanos_since_midnight();
     thread_pool_ = CreateDefaultThreadPool();
     thread_pool_owned = true;
+    end = nanos_since_midnight();
+    add_func_stats("CreateDefaultThreadPool ",start, end, std::string(__FILE__), "create thread pool and setup ownership");
   }
+
+  start = nanos_since_midnight();
   std::unique_ptr<Server> server(new Server(thread_pool_, thread_pool_owned,
                                             max_message_size_,
                                             compression_options_));
+  end = nanos_since_midnight();
+  add_func_stats("new Server(thread_pool_, thread_pool_owned,max_message_size_, compression_options_)", start, end, std::string(__FILE__)," assign thread pool, ownership and compression_options ");
+
   for (auto cq = cqs_.begin(); cq != cqs_.end(); ++cq) {
+	start = nanos_since_midnight();
     grpc_server_register_completion_queue(server->server_, (*cq)->cq(),
                                           nullptr);
+    end = nanos_since_midnight();
+    add_func_stats("grpc_server_register_completion_queue",start, end, std::string(__FILE__), "setup completion queue ");
   }
   for (auto service = services_.begin(); service != services_.end();
        service++) {
+	  start = nanos_since_midnight();
     if (!server->RegisterService((*service)->host.get(), (*service)->service)) {
       return nullptr;
     }
+    end = nanos_since_midnight();
+    add_func_stats("server->RegisterService",start, end, std::string(__FILE__) , "register all services ");
   }
   for (auto service = async_services_.begin(); service != async_services_.end();
        service++) {

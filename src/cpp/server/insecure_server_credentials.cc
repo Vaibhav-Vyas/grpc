@@ -36,6 +36,9 @@
 #include <grpc/grpc.h>
 #include <grpc/support/log.h>
 
+extern uint64_t nanos_since_midnight();
+extern int add_func_stats(std::string func_name, uint64_t start_ns, uint64_t end_nsec, std::string file_name, std::string desc); 
+
 namespace grpc {
 namespace {
 class InsecureServerCredentialsImpl GRPC_FINAL : public ServerCredentials {
@@ -53,8 +56,12 @@ class InsecureServerCredentialsImpl GRPC_FINAL : public ServerCredentials {
 }  // namespace
 
 std::shared_ptr<ServerCredentials> InsecureServerCredentials() {
+  uint64_t start, end;
+  start = nanos_since_midnight();
   return std::shared_ptr<ServerCredentials>(
       new InsecureServerCredentialsImpl());
+  end = nanos_since_midnight();
+  add_func_stats("new InsecureServerCredentialsImpl()",start, end, std::string(__FILE__), " build new InsecureServerCredentialsImpl");
 }
 
 }  // namespace grpc
