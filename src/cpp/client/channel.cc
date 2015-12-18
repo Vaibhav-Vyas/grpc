@@ -104,8 +104,7 @@ void Channel::PerformOpsOnCall(CallOpSetInterface* ops, Call* call) {
              grpc_call_start_batch(call->call(), cops, nops, ops, nullptr));
   GRPC_TIMER_END(GRPC_PTAG_CPP_PERFORM_OPS, call->call());
   end = nanos_since_midnight();
-  add_func_stats("Channel::PerformOpsOnCall", start, end, std::string(__FILE__),
-    		"Does ops->FillOps(cops, &nops); and GRPC_CALL_OK == grpc_call_start_batch(call->call(), cops, nops, ops, nullptr)");
+  add_func_stats("Channel::PerformOpsOnCall", start, end, std::string(__FILE__), "Does ops->FillOps(cops, nops); and GRPC_CALL_OK == grpc_call_start_batch(call(); cops; nops; ops; nullptr)");
 }
 
 void* Channel::RegisterMethod(const char* method) {

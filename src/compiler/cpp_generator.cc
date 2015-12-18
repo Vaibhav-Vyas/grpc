@@ -105,6 +105,7 @@ grpc::string GetHeaderPrologue(const grpc::protobuf::FileDescriptor *file,
     printer.Print(vars, "\n");
     printer.Print(vars, "#include \"$filename_base$.pb.h\"\n");
     printer.Print(vars, "\n");
+
   }
   return output;
 }
@@ -128,6 +129,7 @@ grpc::string GetHeaderIncludes(const grpc::protobuf::FileDescriptor *file,
       "class ServerCompletionQueue;\n"
       "class ServerContext;\n"
       "}  // namespace grpc\n\n";
+
 
   if (!file->package().empty()) {
     std::vector<grpc::string> parts =

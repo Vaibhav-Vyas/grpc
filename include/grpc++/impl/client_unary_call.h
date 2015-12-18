@@ -50,6 +50,7 @@ class RpcMethod;
 
 uint64_t start, end;
 
+
 // Wrapper that performs a blocking unary call
 template <class InputMessage, class OutputMessage>
 Status BlockingUnaryCall(Channel* channel, const RpcMethod& method,

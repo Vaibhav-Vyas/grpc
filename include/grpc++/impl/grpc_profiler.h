@@ -8,19 +8,19 @@
 //  Windows
 #ifdef _WIN32
 
-	#include <intrin.h>
-	uint64_t rdtsc(){
-		return __rdtsc();
-	}
+    #include <intrin.h>
+    uint64_t rdtsc(){
+        return __rdtsc();
+    }
 
 //  Linux/GCC
 #else
 
-	uint64_t rdtsc(){
-		unsigned int lo,hi;
-		__asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
-		return ((uint64_t)hi << 32) | lo;
-	}
+    uint64_t rdtsc(){
+        unsigned int lo,hi;
+        __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
+        return ((uint64_t)hi << 32) | lo;
+    }
 
 #endif
 
@@ -57,14 +57,14 @@ int add_func_stats(std::string func_name, uint64_t start_ns, uint64_t end_nsec, 
 
     if (GRPC_PROFILE_DEBUG_MODE)
     {
-        auto const pos= currFuncStat.fileName.find_last_of('/');
-        const auto actualFileName = currFuncStat.substr(pos+1);
+        //auto const pos= currFuncStat.fileName.find_last_of('/');
+        //const auto actualFileName = currFuncStat.fileName.substr(pos+1);
 
-        std::cout << func_name											   \
-        	<< ", Start:" << currFuncStat.start_ns << " ,"  			   \
-            << " Duration:" << currFuncStat.duration_ns << " ,"           \
-            << " Description:" << currFuncStat.description << ","          \
-            << " FileName:" << actualFileName << "\n";
+        std::cout << func_name                                             \
+            << ", " << currFuncStat.start_ns << ","                 \
+            << "  " << currFuncStat.duration_ns << ","           \
+            << " " << currFuncStat.description << "\n";// << ","          \
+            //<< " FileName:" << actualFileName << "\n";
     }
     funcProfiler.push_back(currFuncStat);
     return 0;
@@ -72,9 +72,9 @@ int add_func_stats(std::string func_name, uint64_t start_ns, uint64_t end_nsec, 
 
 int print_to_file()
 {
-	FILE *fp;
-	std::string resultFileName = "cs739_grpc_result.csv";
-	fp = fopen(resultFileName.c_str(), "a");
+    FILE *fp;
+    std::string resultFileName = "cs739_grpc_result.csv";
+    fp = fopen(resultFileName.c_str(), "a");
 
     FuncStats this_stat;
     for (unsigned int i = 0; i <  (unsigned int)funcProfiler.size(); i++)
@@ -83,7 +83,7 @@ int print_to_file()
         fprintf(fp, "%s,%ld,%ld\n", this_stat.funcName.c_str(), this_stat.start_ns, this_stat.duration_ns);
     }
 
-	fclose(fp);
+    fclose(fp);
 }
 
 void print_all_profile_stats()
