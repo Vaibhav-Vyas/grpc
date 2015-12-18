@@ -51,8 +51,9 @@ using helloworld::Greeter;
 
 extern void print_all_profile_stats();
 extern uint64_t nanos_since_midnight();
+//extern int add_func_stats(std::string funcName, uint64_t start_ns, uint64_t end_nsec, std::string fName = "", std::string desc = "");
 
-
+/*
   //Windows
 #ifdef _WIN32
 
@@ -118,7 +119,7 @@ int add_func_stats(std::string func_name, uint64_t start_ns, uint64_t end_nsec, 
     return 0;
 }
 
-/*
+
 void print_all_profile_stats()
 {
     FuncStats this_stat;
@@ -160,38 +161,38 @@ void RunServer() {
   start = nanos_since_midnight();
   GreeterServiceImpl service;
   end = nanos_since_midnight();
-//  add_func_stats("GreeterServiceImpl ",start, end, std::string(__FILE__)," service init: generic server, thread pool, msg size: max (64M)-1, compression method");
+  add_func_stats("GreeterServiceImpl ",start, end, std::string(__FILE__)," service init: generic server, thread pool, msg size: max (64M)-1, compression method");
 
   ServerBuilder builder;
   // Listen on the given address without any authentication mechanism.
   start = nanos_since_midnight();
   builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
   end = nanos_since_midnight();
-//  add_func_stats("ServerBuilder.AddListeningPort ", start, end, std::string(__FILE__), " add listening port in the namespace");
+  add_func_stats("ServerBuilder.AddListeningPort ", start, end, std::string(__FILE__), " add listening port in the namespace");
 
   // Register "service" as the instance through which we'll communicate with
   // clients. In this case it corresponds to an *synchronous* service.
   start = nanos_since_midnight();
   builder.RegisterService(&service);
   end = nanos_since_midnight();
-//  add_func_stats("ServerBuilder.RegisterService", start, end, std::string(__FILE__), " register service and its methods in the namespace ");
+  add_func_stats("ServerBuilder.RegisterService", start, end, std::string(__FILE__), " register service and its methods in the namespace ");
 
   // Finally assemble the server.
   start = nanos_since_midnight();
   std::unique_ptr<Server> server(builder.BuildAndStart());
 
   end = nanos_since_midnight();
-//  add_func_stats("server(builder.BuildAndStart()", start, end, "assemble the server: check cannot be both async and sync services; create standard thread pool; assign thread pool ownership, completion queue, and start the service");
+  add_func_stats("server(builder.BuildAndStart()", start, end, "assemble the server: check cannot be both async and sync services; create standard thread pool; assign thread pool ownership, completion queue, and start the service");
 
   end0 = nanos_since_midnight();
-//  add_func_stats("Runserver ", start, end, std::string(__FILE__), "Total setup overhead ");
+  add_func_stats("Runserver ", start, end, std::string(__FILE__), "Total setup overhead ");
 
   std::cout << "Server listening on " << server_address << std::endl;
 
   // Wait for the server to shutdown. Note that some other thread must be
   // responsible for shutting down the server for this call to ever return.
 
-//  add_func_stats("CallOpServerSendStatus() : send_status_available_(false) ", start, end -start);
+  add_func_stats("CallOpServerSendStatus() : send_status_available_(false) ", start, end -start);
 
   print_all_profile_stats(); 
   server->Wait();
