@@ -42,9 +42,13 @@
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
+using grpc::ServerReader;
 using grpc::Status;
 using helloworld::HelloRequest;
 using helloworld::HelloReply;
+using helloworld::HelloRequestInt;
+using helloworld::HelloRequestDouble;
+using helloworld::HelloRequestComplex;
 using helloworld::Greeter;
 
 extern uint64_t nanos_since_midnight();
@@ -60,6 +64,58 @@ class GreeterServiceImpl final : public Greeter::Service {
     return Status::OK;
   }
 
+  Status RecordRoute(ServerContext* context, ServerReader<HelloRequest>* reader,
+                     HelloReply* summary) override {
+    HelloRequest point;
+    int point_count = 0;
+    long bytes_recv = 0;
+
+    std::cout <<"Before Stream" << point_count;    
+
+    while (reader->Read(&point)) {
+      point_count++;
+      
+      bytes_recv += strlen(point.name().c_str());
+      std::cout <<"    Stream " << point_count;    
+    }
+
+    std::string result;
+    result ="Total = ";
+    result += static_cast<long>(point_count);
+    summary->set_message(std::string("Inside Stream: Received Bytes = " + result));
+
+    return Status::OK;
+  }
+
+  Status SayHelloInt(ServerContext* context, const HelloRequestInt* request,
+                  HelloReply* reply) override {
+    std::string prefix("Int= ");
+    //std::string buf;
+    //google::protobuf::TextFormat::PrintToString(request, &buf);
+
+    std::cout << "Inside" << prefix;
+    
+    reply->set_message(prefix); // + buf); // + Integer.toString(request->empid()));
+    return Status::OK;
+  }
+
+    Status SayHelloDouble(ServerContext* context, const HelloRequestDouble* request,
+                  HelloReply* reply) override {
+    std::string prefix("Double= ");
+    std::cout << "Inside" << prefix;
+
+    reply->set_message(prefix); // + Integer.toString(request->empid()));
+    return Status::OK;
+  }
+
+   Status SayHelloComplex(ServerContext* context, const HelloRequestComplex* request,
+                  HelloReply* reply) override {
+    std::string prefix("Complex= ");
+    std::cout << "Inside" << prefix;
+
+    reply->set_message(prefix); // + Integer.toString(request->empid()));
+    return Status::OK;
+  }
 };
 
 void RunServer() {
