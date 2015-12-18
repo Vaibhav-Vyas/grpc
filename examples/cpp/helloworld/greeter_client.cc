@@ -447,8 +447,10 @@ measureRoundTripTime(GreeterClient *pGreeter,
     }
     createCSVReport(experimentTitle, maxAttempts, &strMsg);
 
-//    if (1)
-//      return 0;
+    if (1)
+    {
+      return 0;
+    }
 
     cout << "================================================" << std::endl;
     cout << "1.b) Measuring GRPC Marshall time for Doubles." << std::endl;

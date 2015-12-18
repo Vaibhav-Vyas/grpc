@@ -49,7 +49,7 @@ using helloworld::Greeter;
 
 extern uint64_t nanos_since_midnight();
 extern void print_all_profile_stats();
-extern int add_func_stats(std::string funcName, uint64_t start_ns, uint64_t duration_ns); 
+// extern int add_func_stats(std::string funcName, uint64_t start_ns, uint64_t duration_ns);
 
 // Logic and data behind the server's behavior.
 class GreeterServiceImpl final : public Greeter::Service {
@@ -59,6 +59,7 @@ class GreeterServiceImpl final : public Greeter::Service {
     reply->set_message(prefix + request->name());
     return Status::OK;
   }
+
 };
 
 void RunServer() {
