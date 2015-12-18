@@ -172,17 +172,15 @@ class CallOpSendInitialMetadata {
     op->data.send_initial_metadata.count = initial_metadata_count_;
     op->data.send_initial_metadata.metadata = initial_metadata_;
     end = nanos_since_midnight();
-<<<<<<< HEAD
-//    std::cout << "	call.h: CallOpSendInitialMetadata AddOp " << end - start << " ns" << std::endl;
-    add_func_stats(std::string(__FILE__) + " call.h: CallOpSendInitialMetadata AddOp after send status changed to true", start, end-start);
-=======
-    add_func_stats("CallOpSendInitialMetadata AddOp", start, end, std::string(__FILE__), "	call.h: CallOpSendInitialMetadata AddOp ");
->>>>>>> origin/master
+    add_func_stats("CallOpSendInitialMetadata AddOp", start, end, std::string(__FILE__), "	AddOp after send status changed to true");
   }
   void FinishOp(bool* status, int max_message_size) {
+	start = nanos_since_midnight();
     if (!send_) return;
     gpr_free(initial_metadata_);
     send_ = false;
+    end = nanos_since_midnight();
+    add_func_stats("CallOpSendInitialMetadata FinishOp", start, end, std::string(__FILE__), "Cleanup on completion of an RPC call.Free metadata buffer and reset state.");
   }
 
   bool send_;
@@ -216,17 +214,17 @@ class CallOpSendMessage {
     op->data.send_message = send_buf_;
     // Flags are per-message: clear them after use.
     write_options_.Clear();
+
     end = nanos_since_midnight();
-<<<<<<< HEAD
-//    std::cout << "	call.h: CallOpSendMessage AddOp " << end - start << " ns" << std::endl;
-    add_func_stats(std::string(__FILE__) + " CallOpSendMessage AddOp", start, end-start);
-=======
-    add_func_stats(" CallOpSendMessage AddOp", start, end, std::string(__FILE__), "	call.h: CallOpSendMessage AddOp ");
->>>>>>> origin/master
+    add_func_stats(" CallOpSendMessage AddOp", start, end, std::string(__FILE__), "CallOpSendMessage AddOp: Init send op and set ptr for send_buf. ");
+
   }
   void FinishOp(bool* status, int max_message_size) {
-    if (own_buf_) grpc_byte_buffer_destroy(send_buf_);
+    start = nanos_since_midnight();
+	if (own_buf_) grpc_byte_buffer_destroy(send_buf_);
     send_buf_ = nullptr;
+    end = nanos_since_midnight();
+    add_func_stats("CallOpSendInitialMetadata FinishOp", start, end, std::string(__FILE__), "Cleanup on completion of an RPC call.Free send byte buffer and reset state.");
   }
 
  private:
@@ -267,6 +265,8 @@ class CallOpRecvMessage {
   }
 
   void FinishOp(bool* status, int max_message_size) {
+
+	start = nanos_since_midnight();
     if (message_ == nullptr) return;
     if (recv_buf_) {
       if (*status) {
@@ -282,6 +282,9 @@ class CallOpRecvMessage {
       *status = false;
     }
     message_ = nullptr;
+    end = nanos_since_midnight();
+    add_func_stats("CallOpRecvMessage FinishOp", start, end, std::string(__FILE__),
+    		"Cleanup on completion of an RECEIVE message for RPC call. Deserialize recv message, free recv byte buffer and reset state.");
   }
 
  private:
@@ -332,6 +335,7 @@ class CallOpGenericRecvMessage {
   }
 
   void FinishOp(bool* status, int max_message_size) {
+	start = nanos_since_midnight();
     if (!deserialize_) return;
     if (recv_buf_) {
       if (*status) {
@@ -346,6 +350,9 @@ class CallOpGenericRecvMessage {
       *status = false;
     }
     deserialize_.reset();
+    end = nanos_since_midnight();
+    add_func_stats("CallOpGenericRecvMessage FinishOp", start, end, std::string(__FILE__),
+    		"Cleanup on completion of an RECEIVE message for RPC call. Deserialize recv message, free recv byte buffer and reset state.");
   }
 
  private:
@@ -367,7 +374,13 @@ class CallOpClientSendClose {
     op->flags = 0;
     op->reserved = NULL;
   }
-  void FinishOp(bool* status, int max_message_size) { send_ = false; }
+  void FinishOp(bool* status, int max_message_size) {
+	start = nanos_since_midnight();
+	send_ = false;
+	end = nanos_since_midnight();
+	add_func_stats("CallOpClientSendClose FinishOp", start, end, std::string(__FILE__),
+			"Cleanup on completion of an CleintSendClose message for RPC call. Reset state.");
+  }
 
  private:
   bool send_;
@@ -389,16 +402,12 @@ class CallOpServerSendStatus {
     send_status_code_ = static_cast<grpc_status_code>(status.error_code());
     send_status_details_ = status.error_message();
     end = nanos_since_midnight();
-<<<<<<< HEAD
-//    std::cout << "	call.h: CallOpServerSendStatus ServerSendStatus " << end - start << " ns" << std::endl;
-    add_func_stats(std::string(__FILE__) + " CallOpServerSendStatus ServerSendStatus, file trailing_metadata array, change send_status to true, add send_status code/details ", start, end-start);
-=======
-    add_func_stats(" CallOpServerSendStatus ServerSendStatus ", start, end, std::string(__FILE__), "	call.h: CallOpServerSendStatus ServerSendStatus ");
->>>>>>> origin/master
+    add_func_stats(" CallOpServerSendStatus ServerSendStatus ", start, end, std::string(__FILE__), "ServerSendStatus, file trailing_metadata array, change send_status to true, add send_status code/details");
   }
 
  protected:
   void AddOp(grpc_op* ops, size_t* nops) {
+	start = nanos_since_midnight();
     if (!send_status_available_) return;
     grpc_op* op = &ops[(*nops)++];
     op->op = GRPC_OP_SEND_STATUS_FROM_SERVER;
@@ -410,12 +419,19 @@ class CallOpServerSendStatus {
         send_status_details_.empty() ? nullptr : send_status_details_.c_str();
     op->flags = 0;
     op->reserved = NULL;
+	end = nanos_since_midnight();
+	add_func_stats("CallOpServerSendStatus AddOp", start, end, std::string(__FILE__),
+			"Init ServerSendStatus message OP for RPC call. Setup OP value for metadata count, status buffer to be sent, status code.");
   }
 
   void FinishOp(bool* status, int max_message_size) {
+	start = nanos_since_midnight();
     if (!send_status_available_) return;
     gpr_free(trailing_metadata_);
     send_status_available_ = false;
+	end = nanos_since_midnight();
+	add_func_stats("CallOpServerSendStatus FinishOp", start, end, std::string(__FILE__),
+			"Cleanup on completion of an ServerSendStatus message for RPC call. Free Metadata buffer, Reset send status state.");
   }
 
  private:
@@ -437,6 +453,7 @@ class CallOpRecvInitialMetadata {
 
  protected:
   void AddOp(grpc_op* ops, size_t* nops) {
+	start = nanos_since_midnight();
     if (!recv_initial_metadata_) return;
     memset(&recv_initial_metadata_arr_, 0, sizeof(recv_initial_metadata_arr_));
     grpc_op* op = &ops[(*nops)++];
@@ -444,11 +461,18 @@ class CallOpRecvInitialMetadata {
     op->data.recv_initial_metadata = &recv_initial_metadata_arr_;
     op->flags = 0;
     op->reserved = NULL;
+	end = nanos_since_midnight();
+	add_func_stats("CallOpRecvInitialMetadata AddOp", start, end, std::string(__FILE__),
+			"Setup recv_initial_metadata_arr_, RECV META OP.");
   }
   void FinishOp(bool* status, int max_message_size) {
+	start = nanos_since_midnight();
     if (recv_initial_metadata_ == nullptr) return;
     FillMetadataMap(&recv_initial_metadata_arr_, recv_initial_metadata_);
     recv_initial_metadata_ = nullptr;
+	end = nanos_since_midnight();
+	add_func_stats("CallOpRecvInitialMetadata FinishOp", start, end, std::string(__FILE__),
+			"Cleanup on completion of an RecvInitialMetadata message for RPC call. Free recv_initial_metadata_ buffer, Reset recv metadata state.");
   }
 
  private:
@@ -482,6 +506,9 @@ class CallOpClientRecvStatus {
         &status_details_capacity_;
     op->flags = 0;
     op->reserved = NULL;
+	end = nanos_since_midnight();
+	add_func_stats("CallOpClientRecvStatus AddOp", start, end, std::string(__FILE__),
+			"Setup CallOpClientRecvStatus message for RPC call. Setup recv trailing_metadata, recv buffer and status code ptr in recv_status_on_client.");
   }
 
   void FinishOp(bool* status, int max_message_size) {
@@ -492,6 +519,9 @@ class CallOpClientRecvStatus {
         status_details_ ? grpc::string(status_details_) : grpc::string());
     gpr_free(status_details_);
     recv_status_ = nullptr;
+	end = nanos_since_midnight();
+	add_func_stats("CallOpClientRecvStatus FinishOp", start, end, std::string(__FILE__),
+			"Cleanup on completion of an CallOpClientRecvStatus message for RPC call. Free recv_trailing_metadata_arr_ buffer, Reset recv status state.");
   }
 
  private:
@@ -542,15 +572,21 @@ class CallOpSet : public CallOpSetInterface,
  public:
   CallOpSet() : return_tag_(this) {}
   void FillOps(grpc_op* ops, size_t* nops) GRPC_OVERRIDE {
+	// Profile function
+	start = nanos_since_midnight();
     this->Op1::AddOp(ops, nops);
     this->Op2::AddOp(ops, nops);
     this->Op3::AddOp(ops, nops);
     this->Op4::AddOp(ops, nops);
     this->Op5::AddOp(ops, nops);
     this->Op6::AddOp(ops, nops);
+    end = nanos_since_midnight();
+    add_func_stats(" CallOpSet.FillOps", start, end, std::string(__FILE__), "FillOps: Invoke FillOps for all 6 classes.");
   }
 
   bool FinalizeResult(void** tag, bool* status) GRPC_OVERRIDE {
+	// Profile function
+	start = nanos_since_midnight();
     this->Op1::FinishOp(status, max_message_size_);
     this->Op2::FinishOp(status, max_message_size_);
     this->Op3::FinishOp(status, max_message_size_);
@@ -558,6 +594,8 @@ class CallOpSet : public CallOpSetInterface,
     this->Op5::FinishOp(status, max_message_size_);
     this->Op6::FinishOp(status, max_message_size_);
     *tag = return_tag_;
+    end = nanos_since_midnight();
+    add_func_stats(" CallOpSet.FinalizeResult", start, end, std::string(__FILE__), "FinalizeResult: Invoke FinishOp for all 6 classes.");
     return true;
   }
 

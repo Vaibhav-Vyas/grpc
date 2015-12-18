@@ -95,12 +95,7 @@ class RpcMethodHandler : public MethodHandler {
     Status status = SerializationTraits<RequestType>::Deserialize(
         param.request, &req, param.max_message_size);
     end = nanos_since_midnight();
-<<<<<<< HEAD
-//    std::cout << " rpc_service_method.h: Deserialize " << end - start << " ns" << std::endl;
-    add_func_stats(std::string(__FILE__) + " Deserialize", start, end-start);
-=======
-    add_func_stats(" Deserialize", start, end, std::string(__FILE__), " rpc_service_method.h: Deserialize ");
->>>>>>> origin/master
+    add_func_stats("RunHandler->Deserialize", start, end, std::string(__FILE__), " rpc_service_method.h: Deserialize ");
 
     ResponseType rsp;
 
@@ -109,12 +104,7 @@ class RpcMethodHandler : public MethodHandler {
       status = func_(service_, param.server_context, &req, &rsp);
     }
     end = nanos_since_midnight();
-<<<<<<< HEAD
-//    std::cout << " rpc_service_method.h: func_ " << end - start << " ns" << std::endl;
-    add_func_stats(std::string(__FILE__) + " func_", start, end-start);
-=======
-    add_func_stats(" func_", start, end, std::string(__FILE__), " rpc_service_method.h: func_ ");
->>>>>>> origin/master
+    add_func_stats("func_", start, end, std::string(__FILE__), "func_: ");
 
     GPR_ASSERT(!param.server_context->sent_initial_metadata_);
 
@@ -122,68 +112,35 @@ class RpcMethodHandler : public MethodHandler {
     CallOpSet<CallOpSendInitialMetadata, CallOpSendMessage,
               CallOpServerSendStatus> ops;
     end = nanos_since_midnight();
-<<<<<<< HEAD
-//    std::cout << " rpc_service_method.h: OPS obj creation  " << end - start << " ns" << std::endl;
-    add_func_stats(std::string(__FILE__) + " OPS obj creation", start, end-start);
-=======
-    add_func_stats(" OPS obj creation", start, end, std::string(__FILE__), " rpc_service_method.h: OPS obj creation  ");
->>>>>>> origin/master
+    add_func_stats("CallOpSet<SendInitMetadata, SendMsg, ServerSendStatus> OPS obj creation", start, end, std::string(__FILE__), "OPS obj creation with 3 templated classes");
 
     start = nanos_since_midnight();
     ops.SendInitialMetadata(param.server_context->initial_metadata_);
     end = nanos_since_midnight();
-<<<<<<< HEAD
-//    std::cout << " rpc_service_method.h: ops.SendInitialMetadata  " << end - start << " ns" << std::endl;
-    add_func_stats(std::string(__FILE__) + " ops.SendInitialMetadata", start, end-start);
-=======
-    add_func_stats(" ops.SendInitialMetadata", start, end, std::string(__FILE__), " rpc_service_method.h: ops.SendInitialMetadata  ");
->>>>>>> origin/master
+    add_func_stats(" ops.SendInitialMetadata", start, end, std::string(__FILE__), "ops.SendInitialMetadata. ");
 
     if (status.ok()) {
       start = nanos_since_midnight();
       status = ops.SendMessage(rsp);
       end = nanos_since_midnight();
-<<<<<<< HEAD
-//      std::cout << " rpc_service_method.h: ops.SendMessage  " << end - start << " ns" << std::endl;
-      add_func_stats(std::string(__FILE__) + " ops.SendMessage", start, end-start);
-=======
-      add_func_stats(" ops.SendMessage", start, end, std::string(__FILE__), " rpc_service_method.h: ops.SendMessage  ");
->>>>>>> origin/master
+      add_func_stats("ops.SendMessage", start, end, std::string(__FILE__), "ops.SendMessage");
     }
 
     start = nanos_since_midnight();
     ops.ServerSendStatus(param.server_context->trailing_metadata_, status);
     end = nanos_since_midnight();
-<<<<<<< HEAD
-//    std::cout << "rpc_service_method.h: ops.ServerSendStatus  " << end - start << " ns" << std::endl;
-    add_func_stats(std::string(__FILE__) + " ops.ServerSendStatus", start, end-start);
-=======
-    add_func_stats(" ops.ServerSendStatus", start, end, std::string(__FILE__), "rpc_service_method.h: ops.ServerSendStatus  ");
->>>>>>> origin/master
+    add_func_stats(" ops.ServerSendStatus", start, end, std::string(__FILE__), "rpc_service_method.h: ops.ServerSendStatus");
 
     start = nanos_since_midnight();
     param.call->PerformOps(&ops);
     end = nanos_since_midnight();
-<<<<<<< HEAD
-//    std::cout << " rpc_service_method.h: param.call->PerformOps  " << end - start << " ns" << std::endl;
-    add_func_stats(std::string(__FILE__) + " param.call->PerformOps, clent get the reply here", start, end-start);
-=======
-    add_func_stats(" param.call->PerformOps", start, end, std::string(__FILE__), " rpc_service_method.h: param.call->PerformOps  ");
->>>>>>> origin/master
+    add_func_stats(" param.call->PerformOps", start, end, std::string(__FILE__), "rpc_service_method.h: param.call->PerformOps, clent get the reply here.");
 
     start = nanos_since_midnight();
     param.call->cq()->Pluck(&ops);
     end = nanos_since_midnight();
-<<<<<<< HEAD
-//    std::cout << " rpc_service_method.h: param.call->cq()->Pluck(&ops), add call the the completion queue  " << end - start << " ns" << std::endl;
-    add_func_stats(std::string(__FILE__) + " param.call->cq()->Pluck(&ops)", start, end-start);
+    add_func_stats("param.call->cq()->Pluck(&ops)", start, end, std::string(__FILE__), "param.call->cq()->Pluck(&ops), add call the the completion queue.");
     print_all_profile_stats();
-
-
-
-=======
-    add_func_stats(" param.call->cq()->Pluck(&ops)", start, end, std::string(__FILE__), " rpc_service_method.h: param.call->cq()->Pluck(&ops)  ");
->>>>>>> origin/master
   }
 
  private:
