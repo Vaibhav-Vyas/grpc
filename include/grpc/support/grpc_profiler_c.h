@@ -56,7 +56,7 @@ int add_func_stats_c(char * func_name, uint64_t start_ns, uint64_t end_nsec, cha
 
     if (GRPC_PROFILE_DEBUG_MODE)
     {
-        printf("%s,%ld,%ld,%s", func_name,
+        printf("%s,%ld,%ld,%s\n\n", func_name,
         	currFuncStat.start_ns,
             currFuncStat.duration_ns,
             currFuncStat.description);

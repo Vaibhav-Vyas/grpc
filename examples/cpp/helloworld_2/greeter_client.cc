@@ -50,7 +50,7 @@ using helloworld::Greeter;
 
 extern void print_all_profile_stats();
 extern uint64_t nanos_since_midnight();
-extern int add_func_stats(std::string funcName, uint64_t start_ns, uint64_t end_nsec, std::string fName = "", std::string desc = "");
+//extern int add_func_stats(std::string funcName, uint64_t start_ns, uint64_t end_nsec, std::string fName = "", std::string desc = "");
 
 
 class GreeterClient {
