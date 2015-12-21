@@ -35,25 +35,25 @@ struct FuncStats_c
     uint64_t duration_ns;
 };
 
-void FuncStats_c_init(struct FuncStats_c *this, char *func_name, uint64_t start_nsec, uint64_t end_nsec, char* file_name, char* desc)
+void FuncStats_c_init(struct FuncStats_c *thisFuncStat, char *func_name, uint64_t start_nsec, uint64_t end_nsec, char* file_name, char* desc)
 {
-    strcpy(this->funcName, func_name);
-    this->start_ns = start_nsec;
-    this->end_ns = end_nsec;
-    this->duration_ns = end_nsec - start_nsec;
-    strcpy(this->fileName, file_name); /*.length() > 0) ? file_name : " ";*/
-    strcpy(this->description, desc); /* > 0) ? desc : " ";*/
+    strcpy(thisFuncStat->funcName, func_name);
+    thisFuncStat->start_ns = start_nsec;
+    thisFuncStat->end_ns = end_nsec;
+    thisFuncStat->duration_ns = end_nsec - start_nsec;
+    strcpy(thisFuncStat->fileName, file_name); /*.length() > 0) ? file_name : " ";*/
+    strcpy(thisFuncStat->description, desc); /* > 0) ? desc : " ";*/
 }
 
-struct FuncStats_c funcProfiler[255];
-long counter = 0;
+static struct FuncStats_c funcProfiler[255];
+static long counter = 0;
 
 int add_func_stats_c(char * func_name, uint64_t start_ns, uint64_t end_nsec, char * file_name, char * desc)
 {
     struct FuncStats_c currFuncStat;
 
     FuncStats_c_init(&currFuncStat, func_name, start_ns, end_nsec, file_name, desc);
-
+    
     if (GRPC_PROFILE_DEBUG_MODE)
     {
         printf("%s,%ld,%ld,%s\n\n", func_name,
@@ -62,7 +62,9 @@ int add_func_stats_c(char * func_name, uint64_t start_ns, uint64_t end_nsec, cha
             currFuncStat.description);
             
     }
-    funcProfiler[counter++] = currFuncStat;
+
+    funcProfiler[counter % 255] = currFuncStat;
+    counter = counter + 1;
     return 0;
 }
 

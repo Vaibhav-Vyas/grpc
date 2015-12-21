@@ -49,6 +49,7 @@
 #include "src/core/surface/call.h"
 #include "src/core/surface/channel.h"
 #include "src/core/surface/completion_queue.h"
+ #include "grpc/support/grpc_profiler_c.h"
 #include <string.h>
 
 
@@ -1582,6 +1583,9 @@ grpc_call_error grpc_call_start_batch(grpc_call *call, const grpc_op *ops,
   void (*finish_func)(grpc_exec_ctx *, grpc_call *, int, void *) = finish_batch;
   grpc_call_error error;
   grpc_exec_ctx exec_ctx = GRPC_EXEC_CTX_INIT;
+  uint64_t start, start2, end;
+
+  start = nanos_since_midnight_c(); 
 
   if (reserved != NULL) {
     error = GRPC_CALL_ERROR;
@@ -1598,6 +1602,9 @@ grpc_call_error grpc_call_start_batch(grpc_call *call, const grpc_op *ops,
     error = GRPC_CALL_OK;
     goto done;
   }
+  end = nanos_since_midnight_c(); 
+  add_func_stats_c("grpc_call_start_batch: if (nops==0)", start, end, " ",
+      "grpc_call_start_batch: if (nops==0): Sends begin_op and end_op if NOPS==0");
 
   /* rewrite batch ops into ioreq ops */
   for (in = 0, out = 0; in < nops; in++) {
