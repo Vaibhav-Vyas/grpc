@@ -1585,7 +1585,7 @@ grpc_call_error grpc_call_start_batch(grpc_call *call, const grpc_op *ops,
   grpc_exec_ctx exec_ctx = GRPC_EXEC_CTX_INIT;
   uint64_t start, start2, end;
 
-  start = nanos_since_midnight_c(); 
+  start = nanos_since_midnight_c();
 
   if (reserved != NULL) {
     error = GRPC_CALL_ERROR;
@@ -1602,10 +1602,11 @@ grpc_call_error grpc_call_start_batch(grpc_call *call, const grpc_op *ops,
     error = GRPC_CALL_OK;
     goto done;
   }
-  end = nanos_since_midnight_c(); 
+  end = nanos_since_midnight_c();
   add_func_stats_c("grpc_call_start_batch: if (nops==0)", start, end, " ",
       "grpc_call_start_batch: if (nops==0): Sends begin_op and end_op if NOPS==0");
 
+  start2 = nanos_since_midnight_c();
   /* rewrite batch ops into ioreq ops */
   for (in = 0, out = 0; in < nops; in++) {
     op = &ops[in];
@@ -1615,7 +1616,9 @@ grpc_call_error grpc_call_start_batch(grpc_call *call, const grpc_op *ops,
     }
     switch (op->op) {
       case GRPC_OP_SEND_INITIAL_METADATA:
-        /* Flag validation: currently allow no flags */
+        start = nanos_since_midnight_c();
+
+         /* Flag validation: currently allow no flags */
         if (op->flags != 0) {
           error = GRPC_CALL_ERROR_INVALID_FLAGS;
           goto done;
@@ -1630,8 +1633,14 @@ grpc_call_error grpc_call_start_batch(grpc_call *call, const grpc_op *ops,
         req->data.send_metadata.metadata =
             op->data.send_initial_metadata.metadata;
         req->flags = op->flags;
+
+        end = nanos_since_midnight_c();
+        add_func_stats_c("grpc_call_start_batch: Construct GRPC_OP_SEND_INITIAL_METADATA:", start, end, " ",
+              "grpc_call_start_batch: Construct GRPC_OP_SEND_INITIAL_METADATA: grpc_ioreq");
         break;
       case GRPC_OP_SEND_MESSAGE:
+        start = nanos_since_midnight_c();
+
         if (!are_write_flags_valid(op->flags)) {
           error = GRPC_CALL_ERROR_INVALID_FLAGS;
           goto done;
@@ -1648,8 +1657,14 @@ grpc_call_error grpc_call_start_batch(grpc_call *call, const grpc_op *ops,
         req->op = GRPC_IOREQ_SEND_MESSAGE;
         req->data.send_message = op->data.send_message;
         req->flags = op->flags;
+
+        end = nanos_since_midnight_c();
+        add_func_stats_c("grpc_call_start_batch: Construct GRPC_OP_SEND_MESSAGE:", start, end, " ",
+              "grpc_call_start_batch: Construct GRPC_OP_SEND_MESSAGE: grpc_ioreq");
         break;
       case GRPC_OP_SEND_CLOSE_FROM_CLIENT:
+        start = nanos_since_midnight_c();
+
         /* Flag validation: currently allow no flags */
         if (op->flags != 0) {
           error = GRPC_CALL_ERROR_INVALID_FLAGS;
@@ -1666,8 +1681,13 @@ grpc_call_error grpc_call_start_batch(grpc_call *call, const grpc_op *ops,
         }
         req->op = GRPC_IOREQ_SEND_CLOSE;
         req->flags = op->flags;
+
+        end = nanos_since_midnight_c();
+        add_func_stats_c("grpc_call_start_batch: Construct GRPC_OP_SEND_CLOSE_FROM_CLIENT:", start, end, " ",
+              "grpc_call_start_batch: Construct GRPC_OP_SEND_CLOSE_FROM_CLIENT: grpc_ioreq");
         break;
       case GRPC_OP_SEND_STATUS_FROM_SERVER:
+        start = nanos_since_midnight_c();
         /* Flag validation: currently allow no flags */
         if (op->flags != 0) {
           error = GRPC_CALL_ERROR_INVALID_FLAGS;
@@ -1707,8 +1727,13 @@ grpc_call_error grpc_call_start_batch(grpc_call *call, const grpc_op *ops,
           goto done;
         }
         req->op = GRPC_IOREQ_SEND_CLOSE;
+
+        end = nanos_since_midnight_c();
+        add_func_stats_c("grpc_call_start_batch: Construct GRPC_OP_SEND_STATUS_FROM_SERVER:", start, end, " ",
+              "grpc_call_start_batch: Construct GRPC_OP_SEND_STATUS_FROM_SERVER: grpc_ioreq");
         break;
       case GRPC_OP_RECV_INITIAL_METADATA:
+          start = nanos_since_midnight_c();
         /* Flag validation: currently allow no flags */
         if (op->flags != 0) {
           error = GRPC_CALL_ERROR_INVALID_FLAGS;
@@ -1727,8 +1752,13 @@ grpc_call_error grpc_call_start_batch(grpc_call *call, const grpc_op *ops,
         req->data.recv_metadata = op->data.recv_initial_metadata;
         req->data.recv_metadata->count = 0;
         req->flags = op->flags;
+
+        end = nanos_since_midnight_c();
+        add_func_stats_c("grpc_call_start_batch: Construct GRPC_OP_RECV_INITIAL_METADATA:", start, end, " ",
+              "grpc_call_start_batch: Construct GRPC_OP_RECV_INITIAL_METADATA: grpc_ioreq");
         break;
       case GRPC_OP_RECV_MESSAGE:
+        start = nanos_since_midnight_c();
         /* Flag validation: currently allow no flags */
         if (op->flags != 0) {
           error = GRPC_CALL_ERROR_INVALID_FLAGS;
@@ -1742,8 +1772,13 @@ grpc_call_error grpc_call_start_batch(grpc_call *call, const grpc_op *ops,
         req->op = GRPC_IOREQ_RECV_MESSAGE;
         req->data.recv_message = op->data.recv_message;
         req->flags = op->flags;
+
+        end = nanos_since_midnight_c();
+        add_func_stats_c("grpc_call_start_batch: Construct GRPC_OP_RECV_MESSAGE:", start, end, " ",
+              "grpc_call_start_batch: Construct GRPC_OP_RECV_MESSAGE: grpc_ioreq");
         break;
       case GRPC_OP_RECV_STATUS_ON_CLIENT:
+          start = nanos_since_midnight_c();
         /* Flag validation: currently allow no flags */
         if (op->flags != 0) {
           error = GRPC_CALL_ERROR_INVALID_FLAGS;
@@ -1788,8 +1823,13 @@ grpc_call_error grpc_call_start_batch(grpc_call *call, const grpc_op *ops,
         }
         req->op = GRPC_IOREQ_RECV_CLOSE;
         finish_func = finish_batch_with_close;
+
+        end = nanos_since_midnight_c();
+        add_func_stats_c("grpc_call_start_batch: Construct GRPC_OP_RECV_STATUS_ON_CLIENT:", start, end, " ",
+              "grpc_call_start_batch: Construct GRPC_OP_RECV_STATUS_ON_CLIENT: grpc_ioreq");
         break;
       case GRPC_OP_RECV_CLOSE_ON_SERVER:
+        start = nanos_since_midnight_c();
         /* Flag validation: currently allow no flags */
         if (op->flags != 0) {
           error = GRPC_CALL_ERROR_INVALID_FLAGS;
@@ -1812,17 +1852,35 @@ grpc_call_error grpc_call_start_batch(grpc_call *call, const grpc_op *ops,
         }
         req->op = GRPC_IOREQ_RECV_CLOSE;
         finish_func = finish_batch_with_close;
+
+        end = nanos_since_midnight_c();
+        add_func_stats_c("grpc_call_start_batch: Construct GRPC_OP_RECV_CLOSE_ON_SERVER:", start, end, " ",
+              "grpc_call_start_batch: Construct GRPC_OP_RECV_CLOSE_ON_SERVER: grpc_ioreq");
         break;
     }
   }
 
+  end = nanos_since_midnight_c();
+  add_func_stats_c("grpc_call_start_batch: Time to construct all grpc_ioreq objs", start2, end, " ",
+          "grpc_call_start_batch: Time to construct all grpc_ioreq objs");
+
+  start = nanos_since_midnight_c();
   GRPC_CALL_INTERNAL_REF(call, "completion");
   grpc_cq_begin_op(call->cq);
 
+  end = nanos_since_midnight_c();
+  add_func_stats_c("grpc_call_start_batch: grpc_cq_begin_op(call->cq)", start, end, " ", "* Does CQ BEGIN OP here: grpc_cq_begin_op(call->cq)");
+
+
+  start = nanos_since_midnight_c();
   error = grpc_call_start_ioreq_and_call_back(&exec_ctx, call, reqs, out,
                                               finish_func, tag);
 done:
   grpc_exec_ctx_finish(&exec_ctx);
+
+  end = nanos_since_midnight_c();
+  add_func_stats_c("grpc_call_start_batch: grpc_call_start_ioreq_and_call_back", start, end, " ",
+          "* Call and exec of all the IOREQ packet is done here: grpc_call_start_ioreq_and_call_back execution() + grpc_exec_ctx_finish(&exec_ctx);");
   return error;
 }
 
