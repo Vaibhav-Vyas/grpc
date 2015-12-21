@@ -140,7 +140,7 @@ class RpcMethodHandler : public MethodHandler {
     param.call->cq()->Pluck(&ops);
     end = nanos_since_midnight();
     add_func_stats("param.call->cq()->Pluck(&ops)", start, end, std::string(__FILE__), "param.call->cq()->Pluck(&ops), add call the the completion queue.");
-    print_all_profile_stats();
+    // print_all_profile_stats();
   }
 
  private:
