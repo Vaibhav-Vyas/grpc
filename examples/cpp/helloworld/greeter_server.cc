@@ -55,6 +55,14 @@ extern uint64_t nanos_since_midnight();
 extern void print_all_profile_stats();
 // extern int add_func_stats(std::string funcName, uint64_t start_ns, uint64_t duration_ns);
 
+void truncate_result_file()
+{
+  static FILE *fp;
+  static char resultFileName[] = "cs739_grpc_result.csv";
+  fp = fopen(resultFileName, "w"); 
+  fclose(fp);
+}
+
 // Logic and data behind the server's behavior.
 class GreeterServiceImpl final : public Greeter::Service {
   Status SayHello(ServerContext* context, const HelloRequest* request,
@@ -168,7 +176,8 @@ void RunServer() {
 }
 
 int main(int argc, char** argv) {
-
+  
+  truncate_result_file();
   RunServer();
 
   return 0;
