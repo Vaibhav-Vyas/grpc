@@ -40,6 +40,9 @@
 #include <grpc++/support/config.h>
 #include "src/cpp/client/create_channel_internal.h"
 
+extern int add_func_stats(std::string funcName, uint64_t start_ns, uint64_t end_nsec, std::string fName, std::string desc);
+extern uint64_t nanos_since_midnight();
+
 namespace grpc {
 
 namespace {
@@ -62,7 +65,13 @@ class InsecureCredentialsImpl GRPC_FINAL : public Credentials {
 }  // namespace
 
 std::shared_ptr<Credentials> InsecureCredentials() {
+	uint64_t start, end;
+	start = nanos_since_midnight();
   return std::shared_ptr<Credentials>(new InsecureCredentialsImpl());
+  end = nanos_since_midnight();
+  add_func_stats("InsecureCredentials() constructor", start, end, std::string(__FILE__),
+	  "Constructor for insecure credentials class.");
+
 }
 
 }  // namespace grpc
